@@ -28,14 +28,17 @@ catReyeBone = new bones.imageBone("catReyeBone", catBaseBone, 'catreye.png', 88/
 catMoufBone = new bones.imageBone("catMoufBone", catBaseBone, 'catmouf.png', 51/2, 41/2);
 
 mat2d.translate(catBaseBone.transform, catBaseBone.transform, [canvas.width/2,canvas.height/2])
-mat2d.rotate(catBaseBone.transform, catBaseBone.transform, Math.PI / 4)
+mat2d.rotate(catBaseBone.transform, catBaseBone.transform, Math.PI / 9)
 
+mat2d.translate(catLeyeBone.transform, catLeyeBone.transform, [-60, -25])
+mat2d.translate(catReyeBone.transform, catReyeBone.transform, [60, -25])
+mat2d.translate(catMoufBone.transform, catMoufBone.transform, [0, 25])
 
 var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
-  
+  ctx.resetTransform();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   function drawBoneTree(bone){
     var t = bone.getTransformWithParent();

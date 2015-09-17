@@ -20,7 +20,7 @@
 
   bones.bone.prototype.getTransformWithParent = function() {
     var out = matrixType.create();
-    return this.parent == null ? this.transform : matrixType.mul(out, this.transform, this.parent.getTransformWithParent())
+    return this.parent == null ? this.transform : matrixType.mul(out, this.parent.getTransformWithParent(), this.transform)
   }
 
   // image - HTML5 Image() object
