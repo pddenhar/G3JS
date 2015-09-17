@@ -51,18 +51,16 @@
 
   // image - HTML5 Image() object
   // ox, oy - bone local origin location on image (0,0 is top left)
-  bones.imageBone = function(name, parent, imageSrc, ox, oy) {
+  bones.imageBone = function(name, parent, imageSrc, ox, oy, zindex) {
     bones.bone2d.call(this, name, parent);
     this.image = new Image(); // HTML5 Constructor
     this.image.src = imageSrc;
     this.ox = ox;
     this.oy = oy;
+    this.zindex = zindex;
   }
   bones.imageBone.prototype = new bones.bone2d()
-  bones.imageBone.prototype.drawToTransformedCtx = function(ctx) {
-    //console.log("drawing " + this.name + this.pos)
-    ctx.drawImage(this.image, -this.ox, -this.oy);
-  }
+
 
   //Private Library Methods
   // function itsPrivate(array){
