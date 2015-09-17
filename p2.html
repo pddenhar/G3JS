@@ -6,6 +6,7 @@
 
   <script src="gl-matrix.js"></script>
   <script src="bones.js"></script>
+  <script src="animation.js"></script>
   <style type="text/css">
     canvas {
         border: 1px solid #d3d3d3;
@@ -25,7 +26,19 @@ catReyeBone = new bones.imageBone("catReyeBone", catBaseBone, 'catreye.png', 88/
 catMoufBone = new bones.imageBone("catMoufBone", catBaseBone, 'catmouf.png', 51/2, 41/2);
 
 catBaseBone.pos=[canvas.width/2,canvas.height/2];
-catBaseBone.rotation = Math.PI / 9;
+
+catBaseBone.animation = new animation.animation(catBaseBone);
+catBaseBone.animation.addKeyframe(0,{pos:[150, canvas.height*.75]});
+catBaseBone.animation.addKeyframe(6000,{pos:[canvas.width - 150, canvas.height*.75]});
+catBaseBone.animation.addKeyframe(12000,{pos:[150, canvas.height*.75]});
+
+catReyeBone.animation = new animation.animation(catReyeBone);
+catReyeBone.animation.addKeyframe(0,{rotation:0});
+catReyeBone.animation.addKeyframe(3000,{rotation:-Math.PI *2});
+
+catLeyeBone.animation = new animation.animation(catLeyeBone);
+catLeyeBone.animation.addKeyframe(0,{rotation:0});
+catLeyeBone.animation.addKeyframe(5000,{rotation:Math.PI *2});
 
 catLeyeBone.pos=[-60, -25];
 catReyeBone.pos=[60, -25];
@@ -35,20 +48,21 @@ var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
-  catBaseBone.rotation += Math.PI / 8192 * delta;
-  catLeyeBone.rotation -= Math.PI / 2048 * delta;
-  catReyeBone.rotation += Math.PI / 1024 * delta;
+
   ctx.resetTransform();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  function drawBoneTree(bone){
-    var t = bone.getTransformWithParent();
+  function drawBoneTree(bone, parentTfm){
+    if(bone.animation) {
+      bone.animation.update(timestamp);
+    }
+    var t = bone.getTransformWithParentTransform(parentTfm);
     ctx.setTransform(t[0],t[1],t[2],t[3],t[4],t[5]);
     bone.drawToTransformedCtx(ctx);
     for(var key in bone.children) {
-      drawBoneTree(bone.children[key]);
+      drawBoneTree(bone.children[key], t);
     }
   }
-  drawBoneTree(catBaseBone);
+  drawBoneTree(catBaseBone, null);
   window.requestAnimationFrame(loop);
 }
 loop(0);

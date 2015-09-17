@@ -14,6 +14,7 @@
     this.rotation = 0;
 
     this.children = {};
+    this.animation = null;
 
     if(this.parent) {
       this.parent.children[this.name] = this;
@@ -30,6 +31,10 @@
   bones.bone2d.prototype.getTransformWithParent = function() {
     var t = this.getTransform();
     return this.parent == null ? t : this.matrixType.mul(t, this.parent.getTransformWithParent(), t)
+  }
+  bones.bone2d.prototype.getTransformWithParentTransform = function(parentTfm) {
+    var t = this.getTransform();
+    return parentTfm == null ? t : this.matrixType.mul(t, parentTfm, t)
   }
 
   bones.bone3d = function(name, parent) {
