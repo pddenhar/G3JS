@@ -20,19 +20,16 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 
 catBaseBone = new bones.imageBone("catBaseBone", null, 'catbase.png', 250/2, 200/2);
-
 catLeyeBone = new bones.imageBone("catLeyeBone", catBaseBone, 'catleye.png', 32, 32);
-
 catReyeBone = new bones.imageBone("catReyeBone", catBaseBone, 'catreye.png', 88/2, 91/2);
-
 catMoufBone = new bones.imageBone("catMoufBone", catBaseBone, 'catmouf.png', 51/2, 41/2);
 
-mat2d.translate(catBaseBone.transform, catBaseBone.transform, [canvas.width/2,canvas.height/2])
-mat2d.rotate(catBaseBone.transform, catBaseBone.transform, Math.PI / 9)
+catBaseBone.pos=[canvas.width/2,canvas.height/2];
+catBaseBone.rotation = Math.PI / 9;
 
-mat2d.translate(catLeyeBone.transform, catLeyeBone.transform, [-60, -25])
-mat2d.translate(catReyeBone.transform, catReyeBone.transform, [60, -25])
-mat2d.translate(catMoufBone.transform, catMoufBone.transform, [0, 25])
+catLeyeBone.pos=[-60, -25];
+catReyeBone.pos=[60, -25];
+catMoufBone.pos=[0, 25];
 
 var prev = 0;
 function loop(timestamp) {
