@@ -35,6 +35,9 @@ var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
+  catBaseBone.rotation += Math.PI / 8192 * delta;
+  catLeyeBone.rotation -= Math.PI / 2048 * delta;
+  catReyeBone.rotation += Math.PI / 1024 * delta;
   ctx.resetTransform();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   function drawBoneTree(bone){
