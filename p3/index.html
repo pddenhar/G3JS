@@ -14,48 +14,52 @@
   </style>
 </head>
 <body>
-Keyframed Cookie Cat!<br>
+doot doot<br>
 <canvas id="canvas" width="700" height="500"></canvas>
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
+//put 0,0 in the center of the canvas
+ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
+ctx.beginPath();
+ctx.strokeStyle = "black";
+ctx.moveTo(-100,0);
+ctx.lineTo(100,0);
+ctx.stroke();
+
+var chestBone = new bones.wireBone("chestBone", null, 1,1,1);
+
+var projection = mat4.create();
+mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
+
+var cameraMatrix = mat4.create();
+mat4.lookAt(cameraMatrix, [5,5,5], [0,0,0], [0,1,0])
 
 var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
 
-  ctx.resetTransform();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  var drawOrder = [];
+  var transform = mat4.create();
+  mat4.multiply(transform, cameraMatrix, transform);
+  mat4.multiply(transform, projection, transform);
 
   function drawBoneTree(bone, parentTfm){
     if(bone.animation) {
       bone.animation.update(timestamp);
     }
-    var t = bone.getTransformWithParentTransform(parentTfm);
-    var drawThis = function() {
-      ctx.setTransform(t[0],t[1],t[2],t[3],t[4],t[5]);
-      ctx.drawImage(bone.image, -bone.ox, -bone.oy);
-    }
-    drawThis.zindex = bone.zindex;
-    drawOrder.push(drawThis);
+    bone.draw(ctx, transform);
     for(var key in bone.children) {
       drawBoneTree(bone.children[key], t);
     }
   }
-  drawBoneTree(catBaseBone, null);
-  console.log(drawOrder);
-  drawOrder.sort(function(a,b){return a.zindex - b.zindex;});
-  console.log(drawOrder);
-  for (var i = 0; i < drawOrder.length; i++) {
-    drawOrder[i]();
-  };
+  drawBoneTree(chestBone, null);
 
   window.requestAnimationFrame(loop);
 }
-loop(0);
+//loop(0);
 
 </script>
 </body>
