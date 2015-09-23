@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Den Hartog P3</title>
+
+  <script src="gl-matrix.js"></script>
+  <script src="bones.js"></script>
+  <script src="animation.js"></script>
+  <style type="text/css">
+    canvas {
+        border: 1px solid #d3d3d3;
+    }
+  </style>
+</head>
+<body>
+Keyframed Cookie Cat!<br>
+<canvas id="canvas" width="700" height="500"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
+
+var prev = 0;
+function loop(timestamp) {
+  var delta = prev == 0 ? 0 : (timestamp - prev);
+  prev = timestamp;
+
+  ctx.resetTransform();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  var drawOrder = [];
+
+  function drawBoneTree(bone, parentTfm){
+    if(bone.animation) {
+      bone.animation.update(timestamp);
+    }
+    var t = bone.getTransformWithParentTransform(parentTfm);
+    var drawThis = function() {
+      ctx.setTransform(t[0],t[1],t[2],t[3],t[4],t[5]);
+      ctx.drawImage(bone.image, -bone.ox, -bone.oy);
+    }
+    drawThis.zindex = bone.zindex;
+    drawOrder.push(drawThis);
+    for(var key in bone.children) {
+      drawBoneTree(bone.children[key], t);
+    }
+  }
+  drawBoneTree(catBaseBone, null);
+  console.log(drawOrder);
+  drawOrder.sort(function(a,b){return a.zindex - b.zindex;});
+  console.log(drawOrder);
+  for (var i = 0; i < drawOrder.length; i++) {
+    drawOrder[i]();
+  };
+
+  window.requestAnimationFrame(loop);
+}
+loop(0);
+
+</script>
+</body>
+</html>
