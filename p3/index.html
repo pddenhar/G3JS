@@ -7,6 +7,7 @@
   <script src="gl-matrix.js"></script>
   <script src="bones.js"></script>
   <script src="animation.js"></script>
+  <script src="inputManager.js"></script>
   <style type="text/css">
     canvas {
         border: 1px solid #d3d3d3;
@@ -14,6 +15,8 @@
   </style>
 </head>
 <body>
+Use WASD to rotate the object in the viewer and zoom in and out.<br>
+<br>
 doot doot<br>
 <canvas id="canvas" width="700" height="500"></canvas>
 <script>
@@ -21,26 +24,28 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 //put 0,0 in the center of the canvas
 ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
-ctx.beginPath();
-ctx.strokeStyle = "black";
-ctx.moveTo(-100,0);
-ctx.lineTo(100,0);
-ctx.stroke();
 
-var chestBone = new bones.wireBone("chestBone", null, 1,1,1);
+var mainBone = new bones.wireBone("mainBone", null, 3,3,3);
+var smallerBone = new bones.wireBone("smallerBone", mainBone, 2,2,2);
+smallerBone.pos[2] += 3;
+
+var smallererBone = new bones.wireBone("smallererBone", smallerBone, 1,1,1);
+smallererBone.pos[2] += 2;
 
 var projection = mat4.create();
 mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
 
-var cameraMatrix = mat4.create();
-mat4.lookAt(cameraMatrix, [5,5,5], [0,0,0], [0,1,0])
+var cameraPosition = vec3.fromValues(0,7,20);
 
 var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var cameraMatrix = mat4.create();
+  mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
+
+  ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
 
   var transform = mat4.create();
   mat4.multiply(transform, cameraMatrix, transform);
@@ -50,16 +55,48 @@ function loop(timestamp) {
     if(bone.animation) {
       bone.animation.update(timestamp);
     }
-    bone.draw(ctx, transform);
+    var t = bone.getTransformWithParentTransform(parentTfm);
+    bone.draw(canvas, ctx, t);
+
     for(var key in bone.children) {
       drawBoneTree(bone.children[key], t);
     }
   }
-  drawBoneTree(chestBone, null);
+  drawBoneTree(mainBone, transform);
 
+  //HANDLE INPUT
+  if(inputManager.keyboardState[65]) //a
+  {
+    var rotationMatrix = mat4.create();
+    mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/2000 * delta);
+    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
+  }
+
+  if(inputManager.keyboardState[68]) //d
+  {
+    var rotationMatrix = mat4.create();
+    mat4.rotateY(rotationMatrix, rotationMatrix, -Math.PI/2000 * delta);
+    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
+  }
+
+
+  if(inputManager.keyboardState[87] && vec3.len(cameraPosition) > 10) //w
+  {
+    var cameraMove = vec3.create();
+    vec3.normalize(cameraMove,cameraPosition);
+    vec3.sub(cameraPosition, cameraPosition, cameraMove);
+  }
+
+  if(inputManager.keyboardState[83]) //s
+  {
+    var cameraMove = vec3.create();
+    vec3.normalize(cameraMove,cameraPosition);
+    vec3.add(cameraPosition, cameraPosition, cameraMove);
+  }
+  
   window.requestAnimationFrame(loop);
 }
-//loop(0);
+loop(0);
 
 </script>
 </body>
