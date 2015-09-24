@@ -15,7 +15,7 @@
   </style>
 </head>
 <body>
-Use WASD to rotate the object in the viewer and zoom in and out.<br>
+<p>Use WASD to rotate the object in the viewer and zoom in and out.</p>
 <br>
 doot doot<br>
 <canvas id="canvas" width="700" height="500"></canvas>
@@ -25,12 +25,21 @@ var ctx = canvas.getContext('2d');
 //put 0,0 in the center of the canvas
 ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
 
-var mainBone = new bones.wireBone("mainBone", null, 3,3,3);
-var smallerBone = new bones.wireBone("smallerBone", mainBone, 2,2,2);
-smallerBone.pos[2] += 3;
+var boneList = [];
+boneList[0] = new bones.wireBone("mainBone", null, 3,3,3);
+boneList[1] = new bones.wireBone("1", boneList[0], 2,2,2);
+boneList[1].pos[2] += 3;
 
-var smallererBone = new bones.wireBone("smallererBone", smallerBone, 1,1,1);
-smallererBone.pos[2] += 2;
+boneList[2] = new bones.wireBone("2", boneList[1], 1,1,1);
+boneList[2].pos[2] += 2;
+
+boneList[3] = new bones.wireBone("3", boneList[0], 2,2,2);
+boneList[3].pos[1] += 3;
+boneList[3].pos[2] += 0.5;
+
+boneList[4] = new bones.wireBone("4", boneList[3], 1,1,1);
+boneList[4].pos[1] += 2;
+boneList[4].pos[2] += 0.5;
 
 var projection = mat4.create();
 mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
@@ -62,7 +71,7 @@ function loop(timestamp) {
       drawBoneTree(bone.children[key], t);
     }
   }
-  drawBoneTree(mainBone, transform);
+  drawBoneTree(boneList[0], transform);
 
   //HANDLE INPUT
   if(inputManager.keyboardState[65]) //a
