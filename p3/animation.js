@@ -57,12 +57,8 @@
     for(key in k1.propertyValues) {
       k1v = k1.propertyValues[key];
       k2v = k2.propertyValues[key];
-      if( Object.prototype.toString.call( k1v ) === '[object Array]' ) {
-        for (var i = k1v.length - 1; i >= 0; i--) {
-          l1 = k1v[i];
-          l2 = k2v[i];
-          bone[key][i] = l1 + (l2 - l1) * percent;
-        };
+      if( key == "rotation") {
+        quat.slerp(bone[key], k1v, k2v, percent);
       } else {
         bone[key] = k1v + (k2v - k1v) * percent;
       }
