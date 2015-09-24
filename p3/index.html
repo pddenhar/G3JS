@@ -19,6 +19,9 @@
 <br>
 doot doot<br>
 <canvas id="canvas" width="700" height="500"></canvas>
+<form action="">
+<input type="checkbox" id="ortho" name="ortho" value="ortho">Orthographic View<br>
+</form>
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
@@ -47,8 +50,6 @@ boneList[4].pos[2] += 0.5;
 // quat.rotateX(end, end, Math.PI/2)
 // boneList[4].animation.addKeyframe(3000,{rotation:end});
 
-var projection = mat4.create();
-mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
 
 var cameraPosition = vec3.fromValues(0,7,20);
 
@@ -56,6 +57,15 @@ var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
+
+  var projection = mat4.create();
+
+  var c=document.getElementById('ortho');
+  if (c.checked) {
+    mat4.ortho(projection, -14, 14, -10, 10, 2, 30);
+  } else {
+    mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
+  }
 
   var cameraMatrix = mat4.create();
   mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);

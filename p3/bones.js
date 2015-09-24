@@ -87,6 +87,7 @@
       }
       ctx.beginPath();
       ctx.strokeStyle = "black";
+      //console.log(p1[0] * canvas.width, p1[1] * canvas.height);
       ctx.moveTo(p1[0] * canvas.width, p1[1] * canvas.height);
       ctx.lineTo(p2[0] * canvas.width, p2[1] * canvas.height);
       ctx.stroke();
