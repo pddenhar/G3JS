@@ -8,6 +8,7 @@
   <script src="bones.js"></script>
   <script src="animation.js"></script>
   <script src="inputManager.js"></script>
+  <script src="g3djLib.js"></script>
   <style type="text/css">
     canvas {
         border: 1px solid #d3d3d3;
@@ -24,6 +25,9 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 //put 0,0 in the center of the canvas
 ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
+
+//load a g3dj file
+g3djLib.loadModel("cube.g3dj");
 
 var boneList = [];
 boneList[0] = new bones.wireBone("mainBone", null, 3,3,3);
