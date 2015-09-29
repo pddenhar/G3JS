@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <title>Den Hartog P3</title>
+  <title>Den Hartog P4</title>
 
   <script src="gl-matrix.js"></script>
   <script src="bones.js"></script>
@@ -19,9 +19,6 @@
 <br>
 doot doot<br>
 <canvas id="canvas" width="700" height="500"></canvas>
-<form action="">
-<input type="checkbox" id="ortho" name="ortho" value="ortho">Orthographic View<br>
-</form>
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
@@ -52,20 +49,13 @@ boneList[4].pos[2] += 0.5;
 
 
 var cameraPosition = vec3.fromValues(0,7,20);
+var projection = mat4.create();
+mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
 
 var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
-
-  var projection = mat4.create();
-
-  var c=document.getElementById('ortho');
-  if (c.checked) {
-    mat4.ortho(projection, -14, 14, -10, 10, 2, 30);
-  } else {
-    mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
-  }
 
   var cameraMatrix = mat4.create();
   mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
