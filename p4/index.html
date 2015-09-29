@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Den Hartog P3</title>
+
+  <script src="gl-matrix.js"></script>
+  <script src="bones.js"></script>
+  <script src="animation.js"></script>
+  <script src="inputManager.js"></script>
+  <style type="text/css">
+    canvas {
+        border: 1px solid #d3d3d3;
+    }
+  </style>
+</head>
+<body>
+<p>Use WASD to rotate the object in the viewer and Shift and Control to zoom in and out.</p>
+<br>
+doot doot<br>
+<canvas id="canvas" width="700" height="500"></canvas>
+<form action="">
+<input type="checkbox" id="ortho" name="ortho" value="ortho">Orthographic View<br>
+</form>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
+//put 0,0 in the center of the canvas
+ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
+
+var boneList = [];
+boneList[0] = new bones.wireBone("mainBone", null, 3,3,3);
+boneList[1] = new bones.wireBone("1", boneList[0], 2,2,2);
+boneList[1].pos[2] += 3;
+
+boneList[2] = new bones.wireBone("2", boneList[1], 1,1,1);
+boneList[2].pos[2] += 2;
+
+boneList[3] = new bones.wireBone("3", boneList[0], 2,2,2);
+boneList[3].pos[1] += 3;
+boneList[3].pos[2] += 0.5;
+
+boneList[4] = new bones.wireBone("4", boneList[3], 1,1,1);
+boneList[4].pos[1] += 2;
+boneList[4].pos[2] += 0.5;
+
+// boneList[4].animation = new animation.animation(boneList[4]);
+// boneList[4].animation.addKeyframe(0,{rotation:quat.create()});
+// var end = quat.create();
+// quat.rotateX(end, end, Math.PI/2)
+// boneList[4].animation.addKeyframe(3000,{rotation:end});
+
+
+var cameraPosition = vec3.fromValues(0,7,20);
+
+var prev = 0;
+function loop(timestamp) {
+  var delta = prev == 0 ? 0 : (timestamp - prev);
+  prev = timestamp;
+
+  var projection = mat4.create();
+
+  var c=document.getElementById('ortho');
+  if (c.checked) {
+    mat4.ortho(projection, -14, 14, -10, 10, 2, 30);
+  } else {
+    mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
+  }
+
+  var cameraMatrix = mat4.create();
+  mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
+
+  ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+
+  var transform = mat4.create();
+  mat4.multiply(transform, cameraMatrix, transform);
+  mat4.multiply(transform, projection, transform);
+
+  function drawBoneTree(bone, parentTfm){
+    if(bone.animation) {
+      bone.animation.update(timestamp);
+    }
+    var t = bone.getTransformWithParentTransform(parentTfm);
+    bone.draw(canvas, ctx, t);
+
+    for(var key in bone.children) {
+      drawBoneTree(bone.children[key], t);
+    }
+  }
+  drawBoneTree(boneList[0], transform);
+
+  //HANDLE INPUT
+  if(inputManager.keyboardState[65]) //a
+  {
+    var rotationMatrix = mat4.create();
+    mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/2000 * delta);
+    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
+  }
+
+  if(inputManager.keyboardState[68]) //d
+  {
+    var rotationMatrix = mat4.create();
+    mat4.rotateY(rotationMatrix, rotationMatrix, -Math.PI/2000 * delta);
+    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
+  }
+
+  if(inputManager.keyboardState[87] || inputManager.keyboardState[83]) //w or s
+  {
+    var dir = inputManager.keyboardState[83] ? -1 : 1;
+
+    var rotateAxis = vec3.create();
+    vec3.cross(rotateAxis, cameraPosition, [0,1,0]);
+    vec3.normalize(rotateAxis,rotateAxis);
+    var rotationMatrix = mat4.create();
+    mat4.rotate(rotationMatrix, rotationMatrix, Math.PI/2000 * delta * dir, rotateAxis);
+    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
+  }
+
+  if(inputManager.keyboardState[16] && vec3.len(cameraPosition) > 10) //shift
+  {
+    var cameraMove = vec3.create();
+    vec3.normalize(cameraMove,cameraPosition);
+    vec3.sub(cameraPosition, cameraPosition, cameraMove);
+  }
+
+  if(inputManager.keyboardState[17]) //ctl
+  {
+    var cameraMove = vec3.create();
+    vec3.normalize(cameraMove,cameraPosition);
+    vec3.add(cameraPosition, cameraPosition, cameraMove);
+  }
+  
+  window.requestAnimationFrame(loop);
+}
+loop(0);
+
+</script>
+</body>
+</html>
