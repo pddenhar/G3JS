@@ -8,7 +8,9 @@
   <script src="bones.js"></script>
   <script src="animation.js"></script>
   <script src="inputManager.js"></script>
+  <script src="model.js"></script>
   <script src="g3djLib.js"></script>
+  <script src="cube.g3dj"></script>
   <style type="text/css">
     canvas {
         border: 1px solid #d3d3d3;
@@ -27,7 +29,7 @@ var ctx = canvas.getContext('2d');
 ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
 
 //load a g3dj file
-g3djLib.loadModel("cube.g3dj");
+g3djLib.parseModel(cube_obj);
 
 var boneList = [];
 boneList[0] = new bones.wireBone("mainBone", null, 3,3,3);
