@@ -21,8 +21,9 @@
 <body>
 Displaying monkey.g3dj at <span id="fps"></span> fps<br>
 <canvas id="canvas" width="750" height="550"></canvas><br>
-Light Rotation Speed: <input id="lightspeed" type="range" min ="0.0000125" max="0.0009125" step =".000001" value="0.0000325"/>
+Light Rotation Speed: <input style="width:400px;" id="lightspeed" type="range" min ="0.0000125" max="0.009125" step =".000001" value="0.0000325"/>
 <p>Use WASD to rotate the object in the viewer and Shift and Control to zoom in and out.</p>
+<p>The rotation speed slider has an intentionally huge maximum value because it can cause some cool strobing effects depending on frame rate.</p>
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
