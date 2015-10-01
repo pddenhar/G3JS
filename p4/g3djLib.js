@@ -27,7 +27,9 @@
       });
       var vertices = [];
       for (var i = 0; i < loaded_mesh.vertices.length;) {
+        //create vertex
         var vertex = {};
+        //loop through the attributes and <length> elements from vertices
         for (var j = 0; j < attributes.length; j++) {
           var attrname = attributes[j][0];
           if(!(attrname in vertex)) {

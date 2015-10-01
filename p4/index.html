@@ -29,34 +29,13 @@ var ctx = canvas.getContext('2d');
 ctx.setTransform(1, 0, 0, -1, canvas.width / 2, canvas.height / 2);
 
 //load a g3dj file
-g3djLib.parseModel(cube_obj);
-
-var boneList = [];
-boneList[0] = new bones.wireBone("mainBone", null, 3,3,3);
-boneList[1] = new bones.wireBone("1", boneList[0], 2,2,2);
-boneList[1].pos[2] += 3;
-
-boneList[2] = new bones.wireBone("2", boneList[1], 1,1,1);
-boneList[2].pos[2] += 2;
-
-boneList[3] = new bones.wireBone("3", boneList[0], 2,2,2);
-boneList[3].pos[1] += 3;
-boneList[3].pos[2] += 0.5;
-
-boneList[4] = new bones.wireBone("4", boneList[3], 1,1,1);
-boneList[4].pos[1] += 2;
-boneList[4].pos[2] += 0.5;
-
-// boneList[4].animation = new animation.animation(boneList[4]);
-// boneList[4].animation.addKeyframe(0,{rotation:quat.create()});
-// var end = quat.create();
-// quat.rotateX(end, end, Math.PI/2)
-// boneList[4].animation.addKeyframe(3000,{rotation:end});
-
+var model = g3djLib.parseModel(cube_obj);
 
 var cameraPosition = vec3.fromValues(0,7,20);
 var projection = mat4.create();
 mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 2, 20);
+
+var renderer = renderLib.renderer(canvas, ctx);
 
 var prev = 0;
 function loop(timestamp) {
@@ -66,24 +45,19 @@ function loop(timestamp) {
   var cameraMatrix = mat4.create();
   mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
 
+  //clear the canvas
   ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
 
+  //transform by camera matrix
   var transform = mat4.create();
   mat4.multiply(transform, cameraMatrix, transform);
   mat4.multiply(transform, projection, transform);
 
-  function drawBoneTree(bone, parentTfm){
-    if(bone.animation) {
-      bone.animation.update(timestamp);
-    }
-    var t = bone.getTransformWithParentTransform(parentTfm);
-    bone.draw(canvas, ctx, t);
+  //draw model
+  model.draw(renderer);
 
-    for(var key in bone.children) {
-      drawBoneTree(bone.children[key], t);
-    }
-  }
-  drawBoneTree(boneList[0], transform);
+  //render scene
+  renderer.renderFrame(transform);
 
   //HANDLE INPUT
   if(inputManager.keyboardState[65]) //a
