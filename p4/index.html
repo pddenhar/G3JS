@@ -47,8 +47,8 @@ function loop(timestamp) {
   mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
 
   //clear the canvas
-  ctx.clearRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
-
+  ctx.fillStyle="black";
+  ctx.fillRect(-canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
   //transform by camera matrix
   var transform = mat4.create();
   mat4.multiply(transform, cameraMatrix, transform);

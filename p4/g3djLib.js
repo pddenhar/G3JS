@@ -21,9 +21,9 @@
       var attributes = loaded_mesh.attributes.map(function(attribute) {
         var re = /^(\w+?)(\d*)$/; 
         var m = re.exec(attribute);
-        var index = parseInt(m[1]);
+        var index = parseInt(m[2]);
         index = (isNaN(index) ? 0 : index);
-        return [m[0], index];
+        return [m[1], index];
       });
       var vertices = [];
       for (var i = 0; i < loaded_mesh.vertices.length;) {
@@ -39,15 +39,14 @@
           var vattr = [];
           for (var k=0; k < attributeDataSizes[attrname]; k++) {
             vattr.push(loaded_mesh.vertices[i+k]);
-          }
-          i+=attributeDataSizes[attrname];
+          
+}          i+=attributeDataSizes[attrname];
           vertex[attrname].push(vattr);
         };
         //add placeholder position and normal to be used during render
         vertex.transformedPos = vec4.create();
         vertex.transformedNormal = vec3.create();
         vertex.renderPos = vec4.create();
-        vertex.renderNormal = vec3.create();
 
         vertices.push(vertex);
       }
