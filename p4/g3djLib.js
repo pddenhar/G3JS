@@ -35,6 +35,7 @@
           if(!(attrname in vertex)) {
             vertex[attrname] = [];
           }
+          //put <dataSize>(3) points into a list and push them to the vertex's list for that attribute
           var vattr = [];
           for (var k=0; k < attributeDataSizes[attrname]; k++) {
             vattr.push(loaded_mesh.vertices[i+k]);
@@ -42,8 +43,13 @@
           i+=attributeDataSizes[attrname];
           vertex[attrname].push(vattr);
         };
+        //add placeholder position and normal to be used during render
+        vertex.renderPos = vec4.create();
+        vertex.renderNormal = vec3.create();
+
         vertices.push(vertex);
       }
+      //create mesh parts that share the vertices array
       for(var p = 0; p < loaded_mesh.parts.length; p++) {
         model.meshparts[loaded_mesh.parts[p].id] = new modelLib.meshpart(vertices, loaded_mesh.parts[p].indices, loaded_mesh.parts[p].type);
       }

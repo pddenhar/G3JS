@@ -5,11 +5,21 @@
     this.context = context;
     this.triangles = [];
   }
-  renderLib.renderer.addTriangle() {
-    
+  renderLib.renderer.prototype.addTriangle = function(P1, P2, P3) {
+    this.triangles.push([P1, P2, P3]);
   }
-  renderLib.renderer.renderFrame(viewTransform) {
-    var trianglesWithTransform = this.triangles.map(function(p) { var out = vec4.create(); out[3] = 1; vec3.copy(out, p); return vec4.transformMat4(out, out, transform); });
+  renderLib.renderer.prototype.renderFrame = function(viewTransform) {
+    console.log(this.triangles);
+    for (var i = 0; i < this.triangles.length; i++) {
+      var t = this.triangles[i];
+      for (var j = 0; j < t.length; j++) {
+        var vertex = t[j];
+        vec4.transformMat4(vertex.renderPos, vertex.renderPos, viewTransform); 
+        vec3.transformMat4(vertex.renderNormal, vertex.renderNormal, viewTransform); 
+      };
+    };
+    console.log(this.triangles);
+    this.triangles = [];
   }
 
 }( window.renderLib = window.renderLib || {}, null ));
