@@ -19,10 +19,10 @@
   </style>
 </head>
 <body>
+Displaying monkey.g3dj at <span id="fps"></span> fps<br>
+<canvas id="canvas" width="750" height="550"></canvas><br>
+Light Rotation Speed: <input id="lightspeed" type="range" min ="0.0000125" max="0.0009125" step =".000001" value="0.0000325"/>
 <p>Use WASD to rotate the object in the viewer and Shift and Control to zoom in and out.</p>
-<br>
-doot doot<br>
-<canvas id="canvas" width="700" height="500"></canvas>
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
@@ -42,6 +42,8 @@ var prev = 0;
 function loop(timestamp) {
   var delta = prev == 0 ? 0 : (timestamp - prev);
   prev = timestamp;
+
+  document.getElementById("fps").innerHTML = (1000.0 / delta).toFixed(0);
 
   var cameraMatrix = mat4.create();
   mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);

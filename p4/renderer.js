@@ -1,7 +1,6 @@
 (function( renderLib, $, undefined ) { 
   var light = [1,1,1];
-  var lightRotation = mat4.create();
-  mat4.rotateY(lightRotation, lightRotation, Math.PI/80000);
+  
   renderLib.renderer = function(canvas, context) {
     this.canvas = canvas;
     this.context = context;
@@ -11,6 +10,8 @@
     this.triangles.push([P1, P2, P3]);
   }
   renderLib.renderer.prototype.renderFrame = function(viewTransform) {
+    var lightRotation = mat4.create();
+    mat4.rotateY(lightRotation, lightRotation, document.getElementById('lightspeed').value);
     var transformNormal = mat4.create();
     mat4.invert(transformNormal, viewTransform);
     mat4.transpose(transformNormal, transformNormal);
