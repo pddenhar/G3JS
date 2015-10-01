@@ -44,6 +44,8 @@
           vertex[attrname].push(vattr);
         };
         //add placeholder position and normal to be used during render
+        vertex.transformedPos = vec4.create();
+        vertex.transformedNormal = vec3.create();
         vertex.renderPos = vec4.create();
         vertex.renderNormal = vec3.create();
 

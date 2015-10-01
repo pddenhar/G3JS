@@ -35,11 +35,11 @@
 
   function prepareVertexForRender(vertex) {
     //would do bone / parent transforms on vertexes here if I was doing them
-    vec4.set(vertex.renderPos, 0,0,0,1);
-    vec3.set(vertex.renderNormal, 0,0,0);
+    vec4.set(vertex.transformedPos, 0,0,0,1);
+    vec3.set(vertex.transformedNormal, 0,0,0);
     //copy first attribute from list of NORMAL and POSITION
-    vec3.add(vertex.renderPos, vertex.renderPos, vertex.POSITION[0]);
-    vec3.add(vertex.renderNormal, vertex.renderNormal, vertex.NORMAL[0]);
+    vec3.add(vertex.transformedPos, vertex.transformedPos, vertex.POSITION[0]);
+    vec3.add(vertex.transformedNormal, vertex.transformedNormal, vertex.NORMAL[0]);
   }
 
 }( window.modelLib = window.modelLib || {}, null ));
