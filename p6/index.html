@@ -22,53 +22,68 @@
 <body>
 Displaying monkey.g3dj at <span id="fps"></span> fps<br>
 <canvas id="canvas" width="750" height="550"></canvas><br>
-Light Rotation Speed: <input style="width:400px;" id="lightspeed" type="range" min ="0.0000125" max="0.009125" step =".000001" value="0.0000325"/>
+Light Rotation Speed: <input style="width:400px;" id="lightspeed" type="range" min ="0.00125" max="0.09125" step =".00001" value="0.00125"/>
 <p>Use WASD to rotate the object in the viewer and Shift and Control to zoom in and out.</p>
 <p>The rotation speed slider has an intentionally huge maximum value because it can cause some cool strobing effects depending on frame rate.</p>
 <script id="vs" type="notjs">
 attribute vec4 position;
 attribute vec3 normal;
 uniform mat4 viewTransform;
-varying vec3 viewNormal;
+
+uniform mat4 worldTransform;
+//model world normal transform
+uniform mat3 normalTransform;
+
+varying vec3 worldNormal;
+varying vec4 worldPosition;
 void main() {
-  vec4 pos = viewTransform * position;
-  viewNormal = normal;
+  worldPosition = worldTransform * position;
+  vec4 pos = viewTransform * worldPosition;
+
+  worldNormal = normalTransform * normal;
   gl_Position = pos;
 }
 </script>
 <script id="fs" type="notjs">
 precision mediump float;
-varying vec3 viewNormal;
 uniform vec2 resolution;
 uniform float time;
+uniform vec3 lightVector;
+
+varying vec3 worldNormal;
+varying vec4 worldPosition;
+
+vec2 blinnPhongDir(float lightInt, float Ka, float Kd, float Ks, float shininess)
+{
+  vec3 s = normalize(lightVector);
+  vec3 v = normalize(-worldPosition.xyz);
+  vec3 n = normalize(worldNormal);
+  vec3 h = normalize(v+s);
+  float diffuse = Ka + Kd * lightInt * max(0.0, dot(n, s));
+  float spec =  Ks * pow(max(0.0, dot(n,h)), shininess);
+  return vec2(diffuse, spec);
+}
 
 void main() {
+  vec3 base = vec3(0.2,0.0,0.4);
   vec3 color = vec3(0.0,0.5,0.0);
-  float diff = clamp(dot(viewNormal, vec3(1,1,0.5)),0.0,1.0);;
-  float backlight = clamp(dot(viewNormal, vec3(-1,-1,-0.5)), 0.0, 1.0);;
-  gl_FragColor = vec4(color * (diff*.8 + backlight*.2), 1.0);
+  float diff = clamp(dot(worldNormal, lightVector),0.0,1.0);
+  float backlight = clamp(dot(worldNormal, vec3(-1,-1,-0.5)), 0.0, 1.0);;
+  gl_FragColor = vec4(base*backlight + color * diff, 1.0);
 }
 </script>
 <script>
 var gl = twgl.getWebGLContext(document.getElementById("canvas"));
-var programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 
 //load a g3dj file
 var model = g3djLib.parseModel(monkey_obj);
+model.createGLBuffers(gl);
 
-var cameraPosition = vec3.fromValues(0,7,20);
+var cameraPosition = vec3.fromValues(0,7,15);
 var projection = mat4.create();
-mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 1, 30);
+mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 1, 60);
 
-//var renderer = new renderLib.renderer(canvas, ctx);
-
-var arrays = {
-  position: model.meshparts["Meshpart__Suzanne__default"].attribute_lists.POSITION,
-  normal: model.meshparts["Meshpart__Suzanne__default"].attribute_lists.NORMAL,
-  indices:  model.meshparts["Meshpart__Suzanne__default"].indices,
-};
-console.log(gl.enable(gl.DEPTH_TEST));
-var bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
+var renderer = new renderLib.renderer(gl);
 
 var prev = 0;
 function loop(timestamp) {
@@ -85,25 +100,9 @@ function loop(timestamp) {
   mat4.multiply(transform, cameraMatrix, transform);
   mat4.multiply(transform, projection, transform);
 
-  twgl.resizeCanvasToDisplaySize(gl.canvas);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  var uniforms = {
-    time: timestamp * 0.001,
-    resolution: [gl.canvas.width, gl.canvas.height],
-    viewTransform: transform
-  };
-
-  gl.useProgram(programInfo.program);
-  twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
-  twgl.setUniforms(programInfo, uniforms);
-  twgl.drawBufferInfo(gl, gl.TRIANGLES, bufferInfo);
-
-  //draw model
-  //model.draw(renderer);
-
   //render scene
-  //renderer.renderFrame(transform);
+  renderer.renderFrame(transform, [model], delta);
+
   handleInput(delta);
   window.requestAnimationFrame(loop);
 }

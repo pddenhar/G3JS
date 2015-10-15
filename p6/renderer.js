@@ -1,52 +1,37 @@
 (function( renderLib, $, undefined ) { 
   var light = [1,1,1];
   
-  renderLib.renderer = function(canvas, context) {
-    this.canvas = canvas;
-    this.context = context;
-    this.triangles = [];
+  renderLib.renderer = function(glWebContext) {
+    this.gl = glWebContext;
+    this.programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
+    gl.useProgram(this.programInfo.program);
+    gl.enable(gl.DEPTH_TEST);
   }
-  renderLib.renderer.prototype.addTriangle = function(P1, P2, P3) {
-    this.triangles.push([P1, P2, P3]);
-  }
-  renderLib.renderer.prototype.renderFrame = function(viewTransform) {
-    var lightRotation = mat4.create();
-    mat4.rotateY(lightRotation, lightRotation, document.getElementById('lightspeed').value);
-    var transformNormal = mat4.create();
-    mat4.invert(transformNormal, viewTransform);
-    mat4.transpose(transformNormal, transformNormal);
-    for (var i = 0; i < this.triangles.length; i++) {
-      var t = this.triangles[i];
-      var worldNormal = vec3.create();
-      for (var j = 0; j < t.length; j++) {
-        var vertex = t[j];
-        vec3.add(worldNormal, worldNormal, vertex.transformedNormal);
-        vec4.transformMat4(vertex.renderPos, vertex.transformedPos, viewTransform); 
-        vec4.scale(vertex.renderPos, vertex.renderPos, 1/vertex.renderPos[3]);
-      };
-      vec3.scale(worldNormal, worldNormal, 1/3.0);
-      vec3.transformMat4(light, light, lightRotation);
-      t.brightness = Math.max(0,vec3.dot(worldNormal, light));
 
+  renderLib.renderer.prototype.renderFrame = function(viewTransform, models, delta) {
+    var lightRotation = mat4.create();
+    mat4.rotateY(lightRotation, lightRotation, document.getElementById('lightspeed').value * delta);
+    vec3.transformMat4(light, light, lightRotation);
+
+    twgl.resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    this.uniforms = {
+      resolution: [gl.canvas.width, gl.canvas.height],
+      viewTransform: viewTransform,
+      lightVector: light
     };
-    this.triangles.sort(function sortem(a,b) {
-      var az = (a[0].renderPos[2] + a[1].renderPos[2] + a[2].renderPos[2]) / 3.0;
-      var bz = (b[0].renderPos[2] + b[1].renderPos[2] + b[2].renderPos[2]) / 3.0;
-      return bz - az;
-    });
-    for (var i = 0; i < this.triangles.length; i++) {
-      var t = this.triangles[i];
-      this.context.beginPath();
-      this.context.strokeStyle = "hsl(120, 100%, "+(t.brightness*50+20)+"%)";
-      this.context.fillStyle = "hsl(120, 100%, "+(t.brightness*30+25)+"%)";
-      this.context.moveTo(t[0].renderPos[0] * this.canvas.width, t[0].renderPos[1] * this.canvas.height);
-      this.context.lineTo(t[1].renderPos[0] * this.canvas.width, t[1].renderPos[1] * this.canvas.height);
-      this.context.lineTo(t[2].renderPos[0] * this.canvas.width, t[2].renderPos[1] * this.canvas.height);
-      this.context.closePath();
-      this.context.fill();
-      this.context.stroke();
+
+    for (var i = models.length - 1; i >= 0; i--) {
+      models[i].draw(this);
     };
-    this.triangles = [];
+  }
+  renderLib.renderer.prototype.renderMeshpart = function(meshpart, normalTransform, worldTransform) { 
+    this.uniforms.normalTransform = normalTransform;
+    this.uniforms.worldTransform = worldTransform;
+    twgl.setBuffersAndAttributes(gl, this.programInfo, meshpart.bufferInfo);
+    twgl.setUniforms(this.programInfo, this.uniforms);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, meshpart.bufferInfo);
   }
 
 }( window.renderLib = window.renderLib || {}, null ));
