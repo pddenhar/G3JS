@@ -17,19 +17,28 @@
     for (var i = 0; i < loaded_object.meshes.length; i++) {
       var loaded_mesh = loaded_object.meshes[i];
 
+      //map the attributes from NORMAL0 to [NORMAL, 0]
+      var attributes = loaded_mesh.attributes.map(function(attribute) {
+        var re = /^(\w+?)(\d*)$/; 
+        var m = re.exec(attribute);
+        var index = parseInt(m[2]);
+        index = (isNaN(index) ? 0 : index);
+        return [attribute, attributeDataSizes[m[1]]];
+      });
+
       var attribute_lists = {}
       for (var i = 0; i < loaded_mesh.vertices.length;) {
         //loop through the attributes and <length> elements from vertices
-        for (var j = 0; j < loaded_mesh.attributes.length; j++) {
-          var attrname = loaded_mesh.attributes[j];
-          if(!(attrname in attribute_lists)) {
-            attribute_lists[attrname] = [];
+        for (var j = 0; j < attributes.length; j++) {
+          var attrinfo = attributes[j];
+          if(!(attrinfo[0] in attribute_lists)) {
+            attribute_lists[attrinfo[0]] = [];
           }
           //put <dataSize> push them to the vertex's list for that attribute
-          for (var k=0; k < attributeDataSizes[attrname]; k++) {
-            attribute_lists[attrname].push(loaded_mesh.vertices[i+k]);
+          for (var k=0; k < attrinfo[1]; k++) {
+            attribute_lists[attrinfo[0]].push(loaded_mesh.vertices[i+k]);
           }
-          i+=attributeDataSizes[attrname];
+          i+=attrinfo[1];
         };
       }
 
@@ -54,6 +63,7 @@
         };
       }
     };
+    console.log(model);
     return model;
   }
 

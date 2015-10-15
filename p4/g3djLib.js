@@ -22,8 +22,7 @@
         var re = /^(\w+?)(\d*)$/; 
         var m = re.exec(attribute);
         var index = parseInt(m[2]);
-        index = (isNaN(index) ? 0 : index);
-        return [m[1], index];
+        return [m[1], attribute];
       });
       var vertices = [];
       for (var i = 0; i < loaded_mesh.vertices.length;) {

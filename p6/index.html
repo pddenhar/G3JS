@@ -13,6 +13,7 @@
   <script src="model.js"></script>
   <script src="g3djLib.js"></script>
   <script src="monkey.g3dj"></script>
+  <script src="lilcowboy.g3dj"></script>
   <style type="text/css">
     canvas {
         border: 1px solid #d3d3d3;
@@ -20,15 +21,17 @@
   </style>
 </head>
 <body>
-Displaying monkey.g3dj at <span id="fps"></span> fps<br>
-<canvas id="canvas" width="750" height="550"></canvas><br>
-Light Rotation Speed: <input style="width:400px;" id="lightspeed" type="range" min ="0.00125" max="0.09125" step =".00001" value="0.00125"/>
+Displaying lilcowboy.g3dj and monkey.g3dj at <span id="fps"></span> fps<br>
+<canvas id="canvas" width="900" height="700"></canvas><br>
+Light Rotation Speed: <input style="width:400px;" id="lightspeed" type="range" min ="0.0" max="0.09125" step =".00001" value="0.00125"/>
 <p>Use WASD to rotate the object in the viewer and Shift and Control to zoom in and out.</p>
-<p>The rotation speed slider has an intentionally huge maximum value because it can cause some cool strobing effects depending on frame rate.</p>
+
 <script id="vs" type="notjs">
+precision mediump float;
 attribute vec4 position;
 attribute vec3 normal;
-uniform mat4 viewTransform;
+
+uniform mat4 viewProjection;
 
 uniform mat4 worldTransform;
 //model world normal transform
@@ -36,9 +39,13 @@ uniform mat3 normalTransform;
 
 varying vec3 worldNormal;
 varying vec4 worldPosition;
+
 void main() {
+  //vertex position in world coords
   worldPosition = worldTransform * position;
-  vec4 pos = viewTransform * worldPosition;
+
+  //in normalized device coords
+  vec4 pos = viewProjection * worldPosition;
 
   worldNormal = normalTransform * normal;
   gl_Position = pos;
@@ -49,14 +56,17 @@ precision mediump float;
 uniform vec2 resolution;
 uniform float time;
 uniform vec3 lightVector;
+//actual position in world coordinates of the camera
+uniform vec3 cameraPosition;
 
 varying vec3 worldNormal;
 varying vec4 worldPosition;
 
-vec2 blinnPhongDir(float lightInt, float Ka, float Kd, float Ks, float shininess)
+vec2 blinnPhongDir(vec3 lightDir, float lightInt, float Ka, float Kd, float Ks, float shininess)
 {
-  vec3 s = normalize(lightVector);
-  vec3 v = normalize(-worldPosition.xyz);
+  vec3 s = normalize(lightDir);
+  //vector from the camera to the point in the world
+  vec3 v = normalize(cameraPosition-worldPosition.xyz);
   vec3 n = normalize(worldNormal);
   vec3 h = normalize(v+s);
   float diffuse = Ka + Kd * lightInt * max(0.0, dot(n, s));
@@ -65,23 +75,40 @@ vec2 blinnPhongDir(float lightInt, float Ka, float Kd, float Ks, float shininess
 }
 
 void main() {
-  vec3 base = vec3(0.2,0.0,0.4);
-  vec3 color = vec3(0.0,0.5,0.0);
-  float diff = clamp(dot(worldNormal, lightVector),0.0,1.0);
-  float backlight = clamp(dot(worldNormal, vec3(-1,-1,-0.5)), 0.0, 1.0);;
-  gl_FragColor = vec4(base*backlight + color * diff, 1.0);
+  vec2 phong = blinnPhongDir(lightVector, 5.0, .15, .2, 1.0, 5.0)*.8;
+  phong += blinnPhongDir(-lightVector, 5.0, .15, .2, 1.0, 5.0)*.2;
+  vec3 diffColor = vec3(1.0,0.0,1.0) * phong.x;
+  vec3 specColor = vec3(0,1.0,1.0) * phong.y;
+  gl_FragColor = vec4(diffColor + specColor, 1.0);
 }
 </script>
 <script>
 var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 
 //load a g3dj file
-var model = g3djLib.parseModel(monkey_obj);
+var model = g3djLib.parseModel(cowboy_obj);
+mat4.translate(model.worldTransform, model.worldTransform, [-0,-8,0]);
+mat4.rotateX(model.worldTransform, model.worldTransform, -Math.PI/2);
 model.createGLBuffers(gl);
 
-var cameraPosition = vec3.fromValues(0,7,15);
+var model2 = g3djLib.parseModel(monkey_obj);
+model2.createGLBuffers(gl);
+
+var begin = mat4.create();
+mat4.translate(begin, begin, [0,5,2]);
+var end = mat4.create();
+mat4.translate(end, end, [0,16,2]);
+var headanim = new animation.animation(model2.worldTransform);
+headanim.addKeyframe(0, begin);
+headanim.addKeyframe(1000, begin);
+headanim.addKeyframe(2000, end);
+headanim.addKeyframe(4000, end);
+headanim.addKeyframe(5000, begin);
+
+
+var cameraPosition = vec3.fromValues(0,5,35);
 var projection = mat4.create();
-mat4.perspective(projection, Math.PI / 2, canvas.width / canvas.height, 1, 60);
+mat4.perspective(projection, Math.PI / 3, canvas.width / canvas.height, 1, 60);
 
 var renderer = new renderLib.renderer(gl);
 
@@ -95,13 +122,13 @@ function loop(timestamp) {
   var cameraMatrix = mat4.create();
   mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
 
-  //transform by camera matrix
-  var transform = mat4.create();
-  mat4.multiply(transform, cameraMatrix, transform);
-  mat4.multiply(transform, projection, transform);
-
+  var viewProjection = mat4.create();
+  mat4.multiply(viewProjection, cameraMatrix, viewProjection);
+  mat4.multiply(viewProjection, projection, viewProjection);
   //render scene
-  renderer.renderFrame(transform, [model], delta);
+  renderer.renderFrame(viewProjection, cameraPosition, [model, model2], delta);
+
+  headanim.update(timestamp);
 
   handleInput(delta);
   window.requestAnimationFrame(loop);

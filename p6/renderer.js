@@ -1,5 +1,5 @@
 (function( renderLib, $, undefined ) { 
-  var light = [1,1,1];
+  var light = [-1,1,1];
   
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
@@ -8,7 +8,7 @@
     gl.enable(gl.DEPTH_TEST);
   }
 
-  renderLib.renderer.prototype.renderFrame = function(viewTransform, models, delta) {
+  renderLib.renderer.prototype.renderFrame = function(viewProjection, cameraPosition, models, delta) {
     var lightRotation = mat4.create();
     mat4.rotateY(lightRotation, lightRotation, document.getElementById('lightspeed').value * delta);
     vec3.transformMat4(light, light, lightRotation);
@@ -18,7 +18,8 @@
 
     this.uniforms = {
       resolution: [gl.canvas.width, gl.canvas.height],
-      viewTransform: viewTransform,
+      viewProjection: viewProjection,
+      cameraPosition: cameraPosition,
       lightVector: light
     };
 
