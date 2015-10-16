@@ -3,9 +3,9 @@
   
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
-    this.programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
-    gl.useProgram(this.programInfo.program);
-    gl.enable(gl.DEPTH_TEST);
+    this.programInfo = twgl.createProgramInfo(this.gl, ["vs", "fs"]);
+    this.gl.useProgram(this.programInfo.program);
+    this.gl.enable(this.gl.DEPTH_TEST);
   }
 
   renderLib.renderer.prototype.renderFrame = function(viewProjection, cameraPosition, models, delta) {
@@ -13,11 +13,11 @@
     mat4.rotateY(lightRotation, lightRotation, document.getElementById('lightspeed').value * delta);
     vec3.transformMat4(light, light, lightRotation);
 
-    twgl.resizeCanvasToDisplaySize(gl.canvas);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    twgl.resizeCanvasToDisplaySize(this.gl.canvas);
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
     this.uniforms = {
-      resolution: [gl.canvas.width, gl.canvas.height],
+      resolution: [this.gl.canvas.width, this.gl.canvas.height],
       viewProjection: viewProjection,
       cameraPosition: cameraPosition,
       lightVector: light
@@ -30,9 +30,9 @@
   renderLib.renderer.prototype.renderMeshpart = function(meshpart, normalTransform, worldTransform) { 
     this.uniforms.normalTransform = normalTransform;
     this.uniforms.worldTransform = worldTransform;
-    twgl.setBuffersAndAttributes(gl, this.programInfo, meshpart.bufferInfo);
+    twgl.setBuffersAndAttributes(this.gl, this.programInfo, meshpart.bufferInfo);
     twgl.setUniforms(this.programInfo, this.uniforms);
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, meshpart.bufferInfo);
+    twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
   }
 
 }( window.renderLib = window.renderLib || {}, null ));

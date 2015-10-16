@@ -15,6 +15,10 @@
   <script src="monkey.g3dj"></script>
   <script src="lilcowboy.g3dj"></script>
   <style type="text/css">
+    html, body {
+      width:  100%;
+      height: 100%;
+    }
     canvas {
         border: 1px solid #d3d3d3;
     }
@@ -25,7 +29,6 @@ Displaying lilcowboy.g3dj and monkey.g3dj at <span id="fps"></span> fps<br>
 <canvas id="canvas" width="900" height="700"></canvas><br>
 Light Rotation Speed: <input style="width:400px;" id="lightspeed" type="range" min ="0.0" max="0.09125" step =".00001" value="0.00125"/>
 <p>Use WASD to rotate the object in the viewer and Shift and Control to zoom in and out.</p>
-
 <script id="vs" type="notjs">
 precision mediump float;
 attribute vec4 position;
