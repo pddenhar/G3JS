@@ -1,22 +1,30 @@
 (function( modelLib, $, undefined ) { 
   //Public Object Creator
-  modelLib.model = function(meshparts, worldTransform) {
+  //Inherits from entity3d
+  modelLib.model = function(name, parent, meshparts) {
+    entity.entity3d.call(this, name, parent);
     this.meshparts = meshparts || {};
-    this.worldTransform = worldTransform || mat4.create();
   }
+  modelLib.model.prototype = new entity.entity3d();
+  modelLib.model.prototype.draw = function(renderer, parentTransform) {
+    parentTransform = parentTransform || null;
+    var worldTransform = this.getTransformWithParentTransform(parentTransform);
 
-  modelLib.model.prototype.draw = function(renderer) {
     //transform to put normals into worldspace
     var normalTransform = mat3.create();
-    normalTransform = mat3.fromMat4(normalTransform, this.worldTransform);
+    normalTransform = mat3.fromMat4(normalTransform, worldTransform);
 
     mat3.invert(normalTransform, normalTransform);
     mat3.transpose(normalTransform, normalTransform);
 
     for (key in this.meshparts) {
       var meshpart = this.meshparts[key];
-      renderer.renderMeshpart(meshpart, normalTransform, this.worldTransform);
+      renderer.renderMeshpart(meshpart, normalTransform, worldTransform);
     }
+
+    for (key in this.children) {
+      this.children[key].draw(renderer, worldTransform);
+    };
   }
 
   modelLib.model.prototype.createGLBuffers = function(glWebContext) {
@@ -30,9 +38,7 @@
     //attribute lists usually will contain at least position and normal
     this.attribute_lists = attribute_lists || {};
     this.indices = indices || [];
-    this.bones = bones || [];
-
-    
+    this.bones = bones || [];    
   }
 
   modelLib.meshpart.prototype.createGLBuffers = function(glWebContext) {
@@ -45,6 +51,12 @@
     this.bufferInfo = twgl.createBufferInfoFromArrays(glWebContext, arrays);
   }
 
-
+  modelLib.createGLBuffersForDict = function(gl, models) {
+    for (key in models) {
+      var model = models[key];
+      model.createGLBuffers(gl);
+      modelLib.createGLBuffersForDict(gl, model.children);
+    };
+  }
 
 }( window.modelLib = window.modelLib || {}, null ));

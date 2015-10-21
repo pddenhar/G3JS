@@ -23,8 +23,8 @@
       lightVector: light
     };
 
-    for (var i = models.length - 1; i >= 0; i--) {
-      models[i].draw(this);
+    for(key in models){
+      models[key].draw(this);
     };
   }
   renderLib.renderer.prototype.renderMeshpart = function(meshpart, normalTransform, worldTransform) { 

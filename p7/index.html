@@ -6,13 +6,13 @@
 
   <script src="gl-matrix.js"></script>
   <script src="twgl.min.js"></script>
+  <script src="entity.js"></script>
   <script src="bones.js"></script>
   <script src="animation.js"></script>
   <script src="inputManager.js"></script>
   <script src="renderer.js"></script>
   <script src="model.js"></script>
   <script src="g3djLib.js"></script>
-  <script src="monkey.g3dj"></script>
   <script src="lilcowboy.g3dj"></script>
   <style type="text/css">
     html, body {
@@ -89,25 +89,8 @@ void main() {
 var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 
 //load a g3dj file
-var model = g3djLib.parseModel(cowboy_obj);
-mat4.translate(model.worldTransform, model.worldTransform, [-0,-8,0]);
-mat4.rotateX(model.worldTransform, model.worldTransform, -Math.PI/2);
-model.createGLBuffers(gl);
-
-var model2 = g3djLib.parseModel(monkey_obj);
-model2.createGLBuffers(gl);
-
-var begin = mat4.create();
-mat4.translate(begin, begin, [0,5,2]);
-var end = mat4.create();
-mat4.translate(end, end, [0,16,2]);
-var headanim = new animation.animation(model2.worldTransform);
-headanim.addKeyframe(0, begin);
-headanim.addKeyframe(1000, begin);
-headanim.addKeyframe(2000, end);
-headanim.addKeyframe(4000, end);
-headanim.addKeyframe(5000, begin);
-
+var models = g3djLib.parseModel(loaded_obj);
+modelLib.createGLBuffersForDict(gl, models);
 
 var cameraPosition = vec3.fromValues(0,5,35);
 var projection = mat4.create();
@@ -129,9 +112,7 @@ function loop(timestamp) {
   mat4.multiply(viewProjection, cameraMatrix, viewProjection);
   mat4.multiply(viewProjection, projection, viewProjection);
   //render scene
-  renderer.renderFrame(viewProjection, cameraPosition, [model, model2], delta);
-
-  headanim.update(timestamp);
+  renderer.renderFrame(viewProjection, cameraPosition, models, delta);
 
   handleInput(delta);
   window.requestAnimationFrame(loop);

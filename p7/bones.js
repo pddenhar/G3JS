@@ -43,7 +43,7 @@
     this.scale = [1,1,1];
     this.rotation = quat.create();
   }
-  bones.bone3d.prototype = new bones.bone2d()
+  bones.bone3d.prototype = new bones.bone2d();
   bones.bone3d.prototype.matrixType = mat4;
   bones.bone3d.prototype.getTransform = function() {
     var out = mat4.create();

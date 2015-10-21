@@ -1,4 +1,4 @@
-cowboy_obj = {
+loaded_obj = {
   "animations": [],
   "id": "",
   "materials": [

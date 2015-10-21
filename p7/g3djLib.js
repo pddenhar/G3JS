@@ -13,9 +13,10 @@
   }
 
   g3djLib.parseModel = function(loaded_object) {
-    var model = new modelLib.model();
-    for (var i = 0; i < loaded_object.meshes.length; i++) {
-      var loaded_mesh = loaded_object.meshes[i];
+    var meshparts = {};
+    //meshparts can share vertices from the main list and models can share meshparts (theoretically)
+    for (var m = 0; m < loaded_object.meshes.length; m++) {
+      var loaded_mesh = loaded_object.meshes[m];
 
       //map the attributes from NORMAL0 to [NORMAL, 0]
       var attributes = loaded_mesh.attributes.map(function(attribute) {
@@ -44,15 +45,21 @@
 
       //create mesh parts that share the attribute_lists
       for(var p = 0; p < loaded_mesh.parts.length; p++) {
-        model.meshparts[loaded_mesh.parts[p].id] = new modelLib.meshpart(attribute_lists, loaded_mesh.parts[p].indices);
+        var meshpart = new modelLib.meshpart(attribute_lists, loaded_mesh.parts[p].indices);
+        meshparts[loaded_mesh.parts[p].id] = meshpart;
       }
     };
-    for (var n = 0; n < loaded_object.nodes.length; n++) {
-      var node = loaded_object.nodes[n];
+    console.log(meshparts);
+    //this function will be used to recursively create models for all the children of each node in the nodes list
+    function createModelsForNode(node, parent) {
+      var name = node.id;
+      var model = new modelLib.model(name, parent);
       if("parts" in node) {
         for (var i = 0; i < node.parts.length; i++) {
           var nodepart = node.parts[i];
-          var meshpart = model.meshparts[nodepart.meshpartid];
+          var loaded_meshpart = meshparts[nodepart.meshpartid];
+          //place this meshpart that was loaded earlier into this node/model
+          model.meshparts[nodepart.meshpartid] = loaded_meshpart;
           if("bones" in nodepart) {
             var bones = [];
             for (var i = 0; i < nodepart.bones.length; i++) {
@@ -62,9 +69,37 @@
           }
         };
       }
+      if("scale" in node) {
+        model.scale = node.scale;
+      }
+      if("translation" in node) {
+        model.translation = node.translation;
+      }
+      if("rotation" in node) {
+        model.rotation = node.rotation;
+      }
+      if("children" in node) {
+        for (var i = 0; i < node.children.length; i++) {
+          var child = node.children[i];
+          //recurse through this model's children, creating more models from them
+          createModelsForNode(child, model);
+        };
+      }
+      return model;
+    }
+    //the list of parent model objects in this file
+    var models = {};
+    for (var n = 0; n < loaded_object.nodes.length; n++) {
+      var node = loaded_object.nodes[n];
+
+      //the armature is included in nodes but is not a model
+      if(node.id != "Armature") {
+        //recurse through the nodes
+        models[node.id] = createModelsForNode(node, null);
+      }
     };
-    console.log(model);
-    return model;
+    console.log(models);
+    return models;
   }
 
   var attributeDataSizes = { 
