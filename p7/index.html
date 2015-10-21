@@ -68,21 +68,21 @@ uniform vec3 mat_specular;
 varying vec3 worldNormal;
 varying vec4 worldPosition;
 
-vec2 blinnPhongDir(vec3 lightDir, float lightInt, float Ka, float Kd, float Ks, float shininess)
+vec2 blinnPhongDir(vec3 lightDir, float Ka, float Kd, float Ks, float shininess)
 {
   vec3 s = normalize(lightDir);
   //vector from the camera to the point in the world
   vec3 v = normalize(cameraPosition-worldPosition.xyz);
   vec3 n = normalize(worldNormal);
   vec3 h = normalize(v+s);
-  float diffuse = Ka + Kd * lightInt * max(0.0, dot(n, s));
+  float diffuse = Ka + Kd * max(0.0, dot(n, s));
   float spec =  Ks * pow(max(0.0, dot(n,h)), shininess);
   return vec2(diffuse, spec);
 }
 
 void main() {
-  vec2 phong = blinnPhongDir(lightVector, 1.0, 1.0, 1.0, 1.0, 5.0)*.8;
-  //phong += blinnPhongDir(-lightVector, 1.0, .15, 1.0, 1.0, 5.0)*.2;
+  vec2 phong = blinnPhongDir(lightVector, 1.0, 1.0, 0.5, 5.0)*.8;
+  phong += blinnPhongDir(-lightVector, 1.0, 1.0, 0.0, 5.0)*.8;
   vec3 diffColor = mat_diffuse * phong.x;
   vec3 specColor = mat_specular * phong.y;
   gl_FragColor = vec4(diffColor + specColor, 1.0);
