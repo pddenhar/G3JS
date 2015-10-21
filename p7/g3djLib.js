@@ -31,7 +31,7 @@
       var node = loaded_object.nodes[n];
 
       //the armature is included in nodes but is not a model
-      if(node.id != "Armature") {
+      if("parts" in node) {
         //recurse through the nodes
         models[node.id] = createModelsForNode(node, null, meshparts, materials);
       }
