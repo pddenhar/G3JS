@@ -39,6 +39,7 @@
     this.attribute_lists = attribute_lists || {};
     this.indices = indices || [];
     this.bones = bones || [];    
+    this.material = {};
   }
 
   modelLib.meshpart.prototype.createGLBuffers = function(glWebContext) {

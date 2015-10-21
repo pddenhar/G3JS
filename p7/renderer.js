@@ -30,6 +30,8 @@
   renderLib.renderer.prototype.renderMeshpart = function(meshpart, normalTransform, worldTransform) { 
     this.uniforms.normalTransform = normalTransform;
     this.uniforms.worldTransform = worldTransform;
+    this.uniforms.mat_diffuse = meshpart.material.diffuse;
+    this.uniforms.mat_specular = meshpart.material.specular;
     twgl.setBuffersAndAttributes(this.gl, this.programInfo, meshpart.bufferInfo);
     twgl.setUniforms(this.programInfo, this.uniforms);
     twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);

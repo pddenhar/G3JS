@@ -62,6 +62,9 @@ uniform vec3 lightVector;
 //actual position in world coordinates of the camera
 uniform vec3 cameraPosition;
 
+uniform vec3 mat_diffuse;
+uniform vec3 mat_specular;
+
 varying vec3 worldNormal;
 varying vec4 worldPosition;
 
@@ -78,10 +81,10 @@ vec2 blinnPhongDir(vec3 lightDir, float lightInt, float Ka, float Kd, float Ks, 
 }
 
 void main() {
-  vec2 phong = blinnPhongDir(lightVector, 5.0, .15, .2, 1.0, 5.0)*.8;
-  phong += blinnPhongDir(-lightVector, 5.0, .15, .2, 1.0, 5.0)*.2;
-  vec3 diffColor = vec3(1.0,0.0,1.0) * phong.x;
-  vec3 specColor = vec3(0,1.0,1.0) * phong.y;
+  vec2 phong = blinnPhongDir(lightVector, 1.0, 1.0, 1.0, 1.0, 5.0)*.8;
+  //phong += blinnPhongDir(-lightVector, 1.0, .15, 1.0, 1.0, 5.0)*.2;
+  vec3 diffColor = mat_diffuse * phong.x;
+  vec3 specColor = mat_specular * phong.y;
   gl_FragColor = vec4(diffColor + specColor, 1.0);
 }
 </script>
