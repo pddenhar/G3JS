@@ -1,5 +1,5 @@
 (function( renderLib, $, undefined ) { 
-  var light = [-1,1,1];
+  var light = [-5,1,1];
   
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
@@ -10,8 +10,9 @@
 
   renderLib.renderer.prototype.renderFrame = function(viewProjection, cameraPosition, models, delta) {
     var lightRotation = mat4.create();
-    mat4.rotateY(lightRotation, lightRotation, document.getElementById('lightspeed').value * delta);
-    vec3.transformMat4(light, light, lightRotation);
+    mat4.rotateZ(lightRotation, lightRotation, document.getElementById('lightangle').value * -1.0);
+    var framelight = vec3.create();
+    vec3.transformMat4(framelight, light, lightRotation);
 
     twgl.resizeCanvasToDisplaySize(this.gl.canvas);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
@@ -20,7 +21,7 @@
       resolution: [this.gl.canvas.width, this.gl.canvas.height],
       viewProjection: viewProjection,
       cameraPosition: cameraPosition,
-      lightVector: light
+      lightVector: framelight
     };
 
     for(key in models){

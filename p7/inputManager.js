@@ -11,9 +11,13 @@
       inputManager.keyboardState[event.which] = false;
     };
     window.onmousedown = function(event) {
+      if(event.which == 2)
+        event.preventDefault();
       inputManager.mouseState[event.which] = true;
     };
     window.onmouseup = function(event) {
+      if(event.which == 2)
+        event.preventDefault();
       inputManager.mouseState[event.which] = false;
     };
     window.onmousemove = function(event) {

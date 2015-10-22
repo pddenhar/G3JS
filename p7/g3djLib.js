@@ -53,13 +53,13 @@
         loaded_meshpart.material = material;
         //place this meshpart that was loaded earlier into this node/model
         model.meshparts[nodepart.meshpartid] = loaded_meshpart;
-        if("bones" in nodepart) {
-          var bones = [];
-          for (var i = 0; i < nodepart.bones.length; i++) {
-            bones.push(nodepart.bones[i].node); //only make the meshpart bones list contain the IDs of the bones
-          };
-          meshpart.bones = bones;
-        }
+        // if("bones" in nodepart) {
+        //   var bones = [];
+        //   for (var i = 0; i < nodepart.bones.length; i++) {
+        //     bones.push(nodepart.bones[i].node); //only make the meshpart bones list contain the IDs of the bones
+        //   };
+        //   meshpart.bones = bones;
+        // }
       };
     }
     if("scale" in node) {
