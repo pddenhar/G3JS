@@ -13,6 +13,7 @@
   <script src="renderer.js"></script>
   <script src="model.js"></script>
   <script src="g3djLib.js"></script>
+  <script src="world.js"></script>
   <script src="lilcowboy.g3dj"></script>
   <style type="text/css">
     canvas {
@@ -91,7 +92,8 @@ var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 var models = g3djLib.parseModel(loaded_obj);
 modelLib.createGLBuffersForDict(gl, models);
 
-var cameraPosition = vec3.fromValues(0,5,35);
+world.init(models, vec3.fromValues(0,5,35));
+
 var projection = mat4.create();
 mat4.perspective(projection, Math.PI / 3, canvas.width / canvas.height, 1, 200);
 
@@ -106,71 +108,17 @@ function loop(timestamp) {
   document.getElementById("fps").innerHTML = (1000.0 / delta).toFixed(0);
 
   var cameraMatrix = mat4.create();
-  mat4.lookAt(cameraMatrix, cameraPosition, [0,0,0], [0,1,0]);
+  mat4.lookAt(cameraMatrix, world.cameraPosition, [0,0,0], [0,1,0]);
 
   var viewProjection = mat4.create();
   mat4.multiply(viewProjection, cameraMatrix, viewProjection);
   mat4.multiply(viewProjection, projection, viewProjection);
   //render scene
-  renderer.renderFrame(viewProjection, cameraPosition, models, delta);
+  renderer.renderFrame(viewProjection, world.cameraPosition, models, delta);
 
-  handleInput(delta);
+  world.handleInput(delta, inputManager);
+
   window.requestAnimationFrame(loop);
-}
-
-function handleInput(delta) {
-  //HANDLE INPUT
-  if(inputManager.keyboardState[65]) //a
-  {
-    var rotationMatrix = mat4.create();
-    mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/2000 * delta);
-    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
-  }
-
-  if(inputManager.keyboardState[68]) //d
-  {
-    var rotationMatrix = mat4.create();
-    mat4.rotateY(rotationMatrix, rotationMatrix, -Math.PI/2000 * delta);
-    vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
-  }
-
-  if(inputManager.keyboardState[87] && vec3.len(cameraPosition) > 10) //w
-  {
-    var cameraMove = vec3.create();
-    vec3.normalize(cameraMove,cameraPosition);
-    vec3.sub(cameraPosition, cameraPosition, cameraMove);
-  }
-
-  if(inputManager.keyboardState[83]) //s
-  {
-    var cameraMove = vec3.create();
-    vec3.normalize(cameraMove,cameraPosition);
-    vec3.add(cameraPosition, cameraPosition, cameraMove);
-  }
-
-  if(inputManager.mouseState[2]) {
-    if(lastX == null || lastY == null) {
-      lastX = inputManager.mouseState.x;
-      lastY = inputManager.mouseState.y;
-    } else {
-      var diffX = inputManager.mouseState.x - lastX;
-      var diffY = inputManager.mouseState.y - lastY;
-      lastX = inputManager.mouseState.x;
-      lastY = inputManager.mouseState.y;
-
-      var rotationMatrix = mat4.create();
-      mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/1000 * -diffX);
-
-      var rotateAxis = vec3.create();
-      vec3.cross(rotateAxis, cameraPosition, [0,1,0]);
-      vec3.normalize(rotateAxis,rotateAxis);
-      mat4.rotate(rotationMatrix, rotationMatrix, Math.PI/1000 * diffY, rotateAxis);
-      vec3.transformMat4(cameraPosition, cameraPosition, rotationMatrix);
-    }
-  } else {
-    lastX = null;
-    lastY = null;
-  }
 }
 
 loop(0);
