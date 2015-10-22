@@ -1,4 +1,11 @@
 (function( g3djLib, $, undefined ) { 
+  //private library data
+  var attributeDataSizes = { 
+    "POSITION": 3,
+    "NORMAL": 3,
+    "TEXCOORD": 2,
+    "BLENDWEIGHT": 2
+   };
 
   g3djLib.loadModel = function(url, callback) {
     var xobj = new XMLHttpRequest();
@@ -27,6 +34,7 @@
     
     //the list of parent model objects in this file
     var models = {};
+    var armatures = {};
     for (var n = 0; n < loaded_object.nodes.length; n++) {
       var node = loaded_object.nodes[n];
 
@@ -34,6 +42,9 @@
       if("parts" in node) {
         //recurse through the nodes
         models[node.id] = createModelsForNode(node, null, meshparts, materials);
+      } else { //if there are no parts this is an armature
+        var armature = createArmatureForNode(node);
+        armatures[armature.name] = armature;
       }
     };
     console.log(models);
@@ -44,6 +55,7 @@
   function createModelsForNode(node, parent, meshparts, materials) {
     var name = node.id;
     var model = new modelLib.model(name, parent);
+    //assosciate all the meshparts that go with this node
     if("parts" in node) {
       for (var i = 0; i < node.parts.length; i++) {
         var nodepart = node.parts[i];
@@ -53,24 +65,17 @@
         loaded_meshpart.material = material;
         //place this meshpart that was loaded earlier into this node/model
         model.meshparts[nodepart.meshpartid] = loaded_meshpart;
-        // if("bones" in nodepart) {
-        //   var bones = [];
-        //   for (var i = 0; i < nodepart.bones.length; i++) {
-        //     bones.push(nodepart.bones[i].node); //only make the meshpart bones list contain the IDs of the bones
-        //   };
-        //   meshpart.bones = bones;
-        // }
+        if("bones" in nodepart) {
+          var bones = [];
+          for (var i = 0; i < nodepart.bones.length; i++) {
+            bones.push(nodepart.bones[i].node); //only make the meshpart bones list contain the IDs of the bones
+          };
+          loaded_meshpart.bones = bones;
+        }
       };
     }
-    if("scale" in node) {
-      model.scale = node.scale;
-    }
-    if("translation" in node) {
-      model.translation = node.translation;
-    }
-    if("rotation" in node) {
-      model.rotation = node.rotation;
-    }
+    loadScaleTransRot(node,model);
+    //load all child models for node
     if("children" in node) {
       for (var i = 0; i < node.children.length; i++) {
         var child = node.children[i];
@@ -120,12 +125,22 @@
     return meshparts;
   }
 
-  var attributeDataSizes = { 
-    "POSITION": 3,
-    "NORMAL": 3,
-    "TEXCOORD": 2,
-    "BLENDWEIGHT": 2
-   };
+  function createArmatureForNode(node) {
+    var armature = new bones.armature(node.id);
+    loadScaleTransRot(node, entity);
+    //load child bones
+    return armature;
+  }
 
-
+  function loadScaleTransRot(node, entity) {
+    if("scale" in node) {
+      entity.scale = node.scale;
+    }
+    if("translation" in node) {
+      entity.translation = node.translation;
+    }
+    if("rotation" in node) {
+      entity.rotation = node.rotation;
+    }
+  }
 }( window.g3djLib = window.g3djLib || {}, null ));

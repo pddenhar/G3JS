@@ -27,6 +27,7 @@
   {
     var cameraMove = vec3.create();
     vec3.normalize(cameraMove,world.cameraPosition);
+    vec3.scale(cameraMove,cameraMove,delta/16);
     vec3.sub(world.cameraPosition, world.cameraPosition, cameraMove);
   }
 
@@ -34,6 +35,7 @@
   {
     var cameraMove = vec3.create();
     vec3.normalize(cameraMove,world.cameraPosition);
+    vec3.scale(cameraMove,cameraMove,delta/16);
     vec3.add(world.cameraPosition, world.cameraPosition, cameraMove);
   }
 
