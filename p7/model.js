@@ -44,10 +44,14 @@
 
   modelLib.meshpart.prototype.createGLBuffers = function(glWebContext) {
     var arrays = {
-      position: this.attribute_lists.POSITION,
-      normal: this.attribute_lists.NORMAL,
       indices:  this.indices,
     };
+
+    for (key in this.attribute_lists) {
+      var attribute = this.attribute_lists[key];
+      arrays[key] = attribute;
+    }
+
 
     this.bufferInfo = twgl.createBufferInfoFromArrays(glWebContext, arrays);
   }

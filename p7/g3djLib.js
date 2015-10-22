@@ -30,11 +30,9 @@
       var material = loaded_object.materials[i];
       materials[material.id] = material;
     };
-    console.log(materials);
 
     var meshparts = loadMeshparts(loaded_object);
     //meshparts can share vertices from the main list and models can share meshparts (theoretically)
-    console.log(meshparts);
     
     //the list of parent model objects in this file
     var models = {};
@@ -50,13 +48,40 @@
         quat.rotateX(models[node.id].rotation, models[node.id].rotation, -Math.PI/2);
       } else { //if there are no parts this is an armature
         var armature = createArmatureForNode(node);
-        armatures[armature.name] = armature;
         //dirty hack to put parent level armatures at the correct rotation
-        quat.rotateX(armatures[armature.name].rotation, armatures[armature.name].rotation, -Math.PI/2);
+        quat.rotateX(armature.rotation, armature.rotation, -Math.PI/2);
+      
+        //generate inverse bind poses for all child bones
+        armature.generateInverseBindPoses();
+
+        //add to the list of armatures
+        armatures[armature.name] = armature;
       }
     };
-    console.log(models);
-    console.log(armatures);
+
+    //now the models and armatures are loaded.
+    //meshparts bones list only has the names of the bones right now
+    //so we will replace those with references to the bone objects
+    for(key in meshparts) {
+      var meshpart = meshparts[key];
+      for (var i = 0; i < meshpart.bones.length; i++) {
+        var bonename = meshpart.bones[i];
+        var bone = null;
+        for(armatureName in armatures) {
+          if(bonename in armatures[armatureName].bones) {
+            bone = armatures[armatureName].bones[bonename];
+            break;
+          }
+        }
+        if(bone != null) {
+          meshpart.bones[i] = bone;
+        } else {
+          console.error("Could not find bone in armatures! "+ bonename);
+        }
+      };
+    }
+
+
     return models;
   }
 

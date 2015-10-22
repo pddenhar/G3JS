@@ -22,14 +22,21 @@
   </style>
 </head>
 <body>
-Displaying lilcowboy.g3dj at <span id="fps"></span> fps<br>
+Displaying scene.g3dj at <span id="fps"></span> fps<br>
 <canvas id="canvas" width="900" height="700"></canvas><br>
 Time of day: <input style="width:400px;" id="lightangle" type="range" min ="0.0" max="2.8" step =".05" value="0"/>
 <p>Use right click to rotate the viewer and W and S to zoom in and out.</p>
 <script id="vs" type="notjs">
 precision mediump float;
-attribute vec4 position;
-attribute vec3 normal;
+attribute vec4 POSITION;
+attribute vec3 NORMAL;
+attribute vec2 BLENDWEIGHT0;
+attribute vec2 BLENDWEIGHT1;
+attribute vec2 BLENDWEIGHT2;
+attribute vec2 BLENDWEIGHT3;
+attribute vec2 BLENDWEIGHT4;
+attribute vec2 BLENDWEIGHT5;
+attribute vec2 BLENDWEIGHT6;
 
 uniform mat4 viewProjection;
 
@@ -42,12 +49,12 @@ varying vec4 worldPosition;
 
 void main() {
   //vertex position in world coords
-  worldPosition = worldTransform * position;
+  worldPosition = worldTransform * POSITION;
 
   //in normalized device coords
   vec4 pos = viewProjection * worldPosition;
 
-  worldNormal = normalTransform * normal;
+  worldNormal = normalTransform * NORMAL;
   gl_Position = pos;
 }
 </script>
