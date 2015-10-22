@@ -23,7 +23,7 @@
     vec3.transformMat4(world.cameraPosition, world.cameraPosition, rotationMatrix);
   }
 
-  if(inputManager.keyboardState[87] && vec3.len(world.cameraPosition) > 10) //w
+  if(inputManager.keyboardState[87] && vec3.len(world.cameraPosition) > 5) //w
   {
     var cameraMove = vec3.create();
     vec3.normalize(cameraMove,world.cameraPosition);

@@ -7,6 +7,10 @@
     "BLENDWEIGHT": 2
    };
 
+   //transform to move from z-up coordinates
+   var blenderfix = quat.create();
+   quat.rotateX(blenderfix, blenderfix, -Math.PI/2);
+
   g3djLib.loadModel = function(url, callback) {
     var xobj = new XMLHttpRequest();
     xobj.overrideMimeType("application/json");
@@ -36,18 +40,23 @@
     var models = {};
     var armatures = {};
     for (var n = 0; n < loaded_object.nodes.length; n++) {
-      var node = loaded_object.nodes[n];
+      var node = loaded_object.nodes[n];        
 
       //the armature is included in nodes but is not a model
       if("parts" in node) {
         //recurse through the nodes
         models[node.id] = createModelsForNode(node, null, meshparts, materials);
+        //dirty hack to put parent level objects at the correct rotation
+        quat.rotateX(models[node.id].rotation, models[node.id].rotation, -Math.PI/2);
       } else { //if there are no parts this is an armature
         var armature = createArmatureForNode(node);
         armatures[armature.name] = armature;
+        //dirty hack to put parent level armatures at the correct rotation
+        quat.rotateX(armatures[armature.name].rotation, armatures[armature.name].rotation, -Math.PI/2);
       }
     };
     console.log(models);
+    console.log(armatures);
     return models;
   }
 
@@ -127,9 +136,24 @@
 
   function createArmatureForNode(node) {
     var armature = new bones.armature(node.id);
-    loadScaleTransRot(node, entity);
+    loadScaleTransRot(node, armature);
     //load child bones
+    if("children" in node) {
+      for (var i = 0; i < node.children.length; i++) {
+        createBoneForNode(node.children[i], armature, armature);
+      };
+    }
     return armature;
+  }
+
+  function createBoneForNode(node, parent, armature) {
+    var bone = new bones.bone3d(node.id, parent, armature);
+    loadScaleTransRot(node, bone);
+    if("children" in node) {
+      for (var i = 0; i < node.children.length; i++) {
+        createBoneForNode(node.children[i], bone, armature);
+      };
+    }
   }
 
   function loadScaleTransRot(node, entity) {

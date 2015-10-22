@@ -2,10 +2,10 @@
   //Public Object Creator
   //Inherits from entity3d
   modelLib.model = function(name, parent, meshparts) {
-    entity.entity3d.call(this, name, parent);
+    entityLib.entity3d.call(this, name, parent);
     this.meshparts = meshparts || {};
   }
-  modelLib.model.prototype = new entity.entity3d();
+  modelLib.model.prototype = new entityLib.entity3d();
   modelLib.model.prototype.draw = function(renderer, parentTransform) {
     parentTransform = parentTransform || null;
     var worldTransform = this.getTransformWithParentTransform(parentTransform);
