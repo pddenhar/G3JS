@@ -39,22 +39,14 @@
     var armatures = {};
     for (var n = 0; n < loaded_object.nodes.length; n++) {
       var node = loaded_object.nodes[n];        
-
       //the armature is included in nodes but is not a model
       if("parts" in node) {
         //recurse through the nodes
         models[node.id] = createModelsForNode(node, null, meshparts, materials);
-        //dirty hack to put parent level objects at the correct rotation
-        //quat.rotateX(models[node.id].rotation, models[node.id].rotation, -Math.PI/2);
       } else { //if there are no parts this is an armature
         var armature = createArmatureForNode(node);
-        //dirty hack to put parent level armatures at the correct rotation
-        //TODO
-        //quat.rotateX(armature.rotation, armature.rotation, -Math.PI/2);
-      
         //generate inverse bind poses for all child bones
         armature.generateInverseBindPoses();
-
         //add to the list of armatures
         armatures[armature.name] = armature;
       }
@@ -152,21 +144,21 @@
       }
 
       //fix the normals and positions from blender coordinates
+      //TODO this should be generalized
       for (var i = 0; i < attribute_lists["POSITION"].length; i+=3) {
         var x = attribute_lists["POSITION"][i];
         var y = attribute_lists["POSITION"][i+2];
         var z = -attribute_lists["POSITION"][i+1];
         attribute_lists["POSITION"][i+1] = y;
         attribute_lists["POSITION"][i+2] = z;
-      };
-      //fix the normals and positions from blender coordinates
+      }
       for (var i = 0; i < attribute_lists["NORMAL"].length; i+=3) {
         var x = attribute_lists["NORMAL"][i];
         var y = attribute_lists["NORMAL"][i+2];
         var z = -attribute_lists["NORMAL"][i+1];
         attribute_lists["NORMAL"][i+1] = y;
         attribute_lists["NORMAL"][i+2] = z;
-      };
+      }
 
       //create mesh parts that share the attribute_lists
       for(var p = 0; p < loaded_mesh.parts.length; p++) {
