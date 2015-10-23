@@ -4,7 +4,8 @@
     "POSITION": 3,
     "NORMAL": 3,
     "TEXCOORD": 2,
-    "BLENDWEIGHT": 2
+    "BLENDWEIGHT": 2,
+    "COLOR": 4
    };
 
    //transform to move from z-up coordinates
@@ -124,6 +125,9 @@
         var m = re.exec(attribute);
         var index = parseInt(m[2]);
         index = (isNaN(index) ? 0 : index);
+        if(!(m[1] in attributeDataSizes)) {
+          console.error("Found attribute not in known types");
+        }
         return [attribute, attributeDataSizes[m[1]]];
       });
 

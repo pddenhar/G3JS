@@ -7,6 +7,7 @@
     world.cameraPosition = cameraPosition || vec3.create();
   }
 
+  var lastX = null, lastY=null, lastWheelY=0;
   world.handleInput = function(delta, inputManager) {
   //HANDLE INPUT
   if(inputManager.keyboardState[65]) //a
@@ -23,20 +24,25 @@
     vec3.transformMat4(world.cameraPosition, world.cameraPosition, rotationMatrix);
   }
 
-  if(inputManager.keyboardState[87] && vec3.len(world.cameraPosition) > 5) //w
-  {
+  function zoom(amount) {
     var cameraMove = vec3.create();
     vec3.normalize(cameraMove,world.cameraPosition);
-    vec3.scale(cameraMove,cameraMove,delta/16);
-    vec3.sub(world.cameraPosition, world.cameraPosition, cameraMove);
+    vec3.scale(cameraMove,cameraMove,amount);
+    vec3.add(world.cameraPosition, world.cameraPosition, cameraMove);
   }
 
+  if(inputManager.keyboardState[87] && vec3.len(world.cameraPosition) > 5) //w
+  {
+    zoom(-delta/16);
+  }
+  if(inputManager.mouseState.wheelY != lastWheelY) {
+    var deltaY = inputManager.mouseState.wheelY - lastWheelY;
+    lastWheelY = inputManager.mouseState.wheelY;
+    zoom(-deltaY/25);
+  }
   if(inputManager.keyboardState[83]) //s
   {
-    var cameraMove = vec3.create();
-    vec3.normalize(cameraMove,world.cameraPosition);
-    vec3.scale(cameraMove,cameraMove,delta/16);
-    vec3.add(world.cameraPosition, world.cameraPosition, cameraMove);
+    zoom(delta/16);
   }
 
   if(inputManager.mouseState[2] || inputManager.mouseState[3]) {

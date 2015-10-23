@@ -99,7 +99,7 @@ var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 var models = g3djLib.parseModel(loaded_obj);
 modelLib.createGLBuffersForDict(gl, models);
 
-world.init(models, vec3.fromValues(15,15,20));
+world.init(models, vec3.fromValues(45,35,40));
 
 var projection = mat4.create();
 mat4.perspective(projection, Math.PI / 3, canvas.width / canvas.height, 1, 200);

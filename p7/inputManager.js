@@ -3,6 +3,8 @@
   inputManager.mouseState = {};
 
   function initManager() {
+    inputManager.mouseState.wheelY = 0;
+    
     window.onkeydown=function(event) {
       //console.log(event.which);
       inputManager.keyboardState[event.which] = true;
@@ -23,6 +25,10 @@
     window.onmousemove = function(event) {
       inputManager.mouseState.x = event.pageX;
       inputManager.mouseState.y = event.pageY;
+    };
+    window.onwheel = function(event) {
+      var deltaY = event.wheelDeltaY;
+      inputManager.mouseState.wheelY += deltaY;
     };
   }
   initManager();
