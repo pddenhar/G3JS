@@ -125,11 +125,6 @@ function loop(timestamp) {
 
   world.handleInput(delta, inputManager);
 
-  //models.pig.translation[0] = 8 + 6*Math.sin(timestamp/1000);
-  //models.pig.translation[2] = 6 + 6*Math.cos(timestamp/1000);
-  // var nothing = quat.create();
-  // quat.rotateX(models.pig.rotation, nothing, (timestamp/1000) + Math.PI/4);
-
   window.requestAnimationFrame(loop);
 }
 
