@@ -8,8 +8,10 @@
    };
 
    //transform to move from z-up coordinates
+   var globalParent = new entityLib.entity3d("global", null);
    var blenderfix = quat.create();
    quat.rotateX(blenderfix, blenderfix, -Math.PI/2);
+   globalParent.rotation = blenderfix;
 
   g3djLib.loadModel = function(url, callback) {
     var xobj = new XMLHttpRequest();
@@ -42,7 +44,7 @@
       //the armature is included in nodes but is not a model
       if("parts" in node) {
         //recurse through the nodes
-        models[node.id] = createModelsForNode(node, null, meshparts, materials);
+        models[node.id] = createModelsForNode(node, globalParent, meshparts, materials);
       } else { //if there are no parts this is an armature
         var armature = createArmatureForNode(node);
         //generate inverse bind poses for all child bones
@@ -145,20 +147,20 @@
 
       //fix the normals and positions from blender coordinates
       //TODO this should be generalized
-      for (var i = 0; i < attribute_lists["POSITION"].length; i+=3) {
-        var x = attribute_lists["POSITION"][i];
-        var y = attribute_lists["POSITION"][i+2];
-        var z = -attribute_lists["POSITION"][i+1];
-        attribute_lists["POSITION"][i+1] = y;
-        attribute_lists["POSITION"][i+2] = z;
-      }
-      for (var i = 0; i < attribute_lists["NORMAL"].length; i+=3) {
-        var x = attribute_lists["NORMAL"][i];
-        var y = attribute_lists["NORMAL"][i+2];
-        var z = -attribute_lists["NORMAL"][i+1];
-        attribute_lists["NORMAL"][i+1] = y;
-        attribute_lists["NORMAL"][i+2] = z;
-      }
+      // for (var i = 0; i < attribute_lists["POSITION"].length; i+=3) {
+      //   var x = attribute_lists["POSITION"][i];
+      //   var y = attribute_lists["POSITION"][i+2];
+      //   var z = -attribute_lists["POSITION"][i+1];
+      //   attribute_lists["POSITION"][i+1] = y;
+      //   attribute_lists["POSITION"][i+2] = z;
+      // }
+      // for (var i = 0; i < attribute_lists["NORMAL"].length; i+=3) {
+      //   var x = attribute_lists["NORMAL"][i];
+      //   var y = attribute_lists["NORMAL"][i+2];
+      //   var z = -attribute_lists["NORMAL"][i+1];
+      //   attribute_lists["NORMAL"][i+1] = y;
+      //   attribute_lists["NORMAL"][i+2] = z;
+      // }
 
       //create mesh parts that share the attribute_lists
       for(var p = 0; p < loaded_mesh.parts.length; p++) {
@@ -192,14 +194,27 @@
   }
 
   function loadScaleTransRot(node, entity) {
+    // if("scale" in node) {
+    //   entity.scale = [node.scale[0], node.scale[2], node.scale[1]];
+    // }
+    // if("translation" in node) {
+    //   entity.translation = [node.translation[0], node.translation[2], -node.translation[1]];
+    // }
+    // if("rotation" in node) {
+    //   entity.rotation = [node.rotation[0],node.rotation[2], -node.rotation[1],node.rotation[3]];
+    //   //quat.calculateW(entity.rotation, entity.rotation);
+    //   //console.log(entity.rotation);
+    //   //entity.rotation = node.rotation
+    //   //quat.rotateX(entity.rotation, node.rotation, -Math.PI/2);
+    // }
     if("scale" in node) {
-      entity.scale = [node.scale[0], node.scale[2], node.scale[1]];
+      entity.scale = node.scale;
     }
     if("translation" in node) {
-      entity.translation = [node.translation[0], node.translation[2], -node.translation[1]];
+      entity.translation = node.translation;
     }
     if("rotation" in node) {
-      entity.rotation = [node.rotation[0],node.rotation[2], -node.rotation[1],node.rotation[3]];
+      entity.rotation = node.rotation;
       //quat.calculateW(entity.rotation, entity.rotation);
       //console.log(entity.rotation);
       //entity.rotation = node.rotation

@@ -8,7 +8,7 @@
   modelLib.model.prototype = new entityLib.entity3d();
   modelLib.model.prototype.draw = function(renderer, parentTransform) {
     parentTransform = parentTransform || null;
-    var worldTransform = this.getTransformWithParentTransform(parentTransform);
+    var worldTransform = this.getTransformWithParent();
 
     //transform to put normals into worldspace
     var normalTransform = mat3.create();
