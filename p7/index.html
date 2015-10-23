@@ -99,7 +99,7 @@ var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 var models = g3djLib.parseModel(loaded_obj);
 modelLib.createGLBuffersForDict(gl, models);
 
-world.init(models, vec3.fromValues(0,5,35));
+world.init(models, vec3.fromValues(15,15,20));
 
 var projection = mat4.create();
 mat4.perspective(projection, Math.PI / 3, canvas.width / canvas.height, 1, 200);
@@ -127,8 +127,8 @@ function loop(timestamp) {
 
   //models.pig.translation[0] = 8 + 6*Math.sin(timestamp/1000);
   //models.pig.translation[2] = 6 + 6*Math.cos(timestamp/1000);
-  //var nothing = quat.create();
-  //quat.rotateZ(models.pig.rotation, [-.707,0,0,.707], (timestamp/1000) + Math.PI/4);
+  // var nothing = quat.create();
+  // quat.rotateX(models.pig.rotation, nothing, (timestamp/1000) + Math.PI/4);
 
   window.requestAnimationFrame(loop);
 }

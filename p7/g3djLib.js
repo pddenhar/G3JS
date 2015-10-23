@@ -204,10 +204,14 @@
       entity.scale = [node.scale[0], node.scale[2], node.scale[1]];
     }
     if("translation" in node) {
-      entity.translation = [node.translation[0], node.translation[2], node.translation[1]];
+      entity.translation = [node.translation[0], node.translation[2], -node.translation[1]];
     }
     if("rotation" in node) {
-      entity.rotation = [node.rotation[0],node.rotation[2], node.rotation[1],-node.rotation[3]];
+      entity.rotation = [node.rotation[0],node.rotation[2], -node.rotation[1],node.rotation[3]];
+      //quat.calculateW(entity.rotation, entity.rotation);
+      //console.log(entity.rotation);
+      //entity.rotation = node.rotation
+      //quat.rotateX(entity.rotation, node.rotation, -Math.PI/2);
     }
   }
 }( window.g3djLib = window.g3djLib || {}, null ));
