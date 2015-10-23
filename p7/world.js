@@ -39,7 +39,7 @@
     vec3.add(world.cameraPosition, world.cameraPosition, cameraMove);
   }
 
-  if(inputManager.mouseState[2]) {
+  if(inputManager.mouseState[2] || inputManager.mouseState[3]) {
     if(lastX == null || lastY == null) {
       lastX = inputManager.mouseState.x;
       lastY = inputManager.mouseState.y;

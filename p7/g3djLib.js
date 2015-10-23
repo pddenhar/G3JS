@@ -45,11 +45,12 @@
         //recurse through the nodes
         models[node.id] = createModelsForNode(node, null, meshparts, materials);
         //dirty hack to put parent level objects at the correct rotation
-        quat.rotateX(models[node.id].rotation, models[node.id].rotation, -Math.PI/2);
+        //quat.rotateX(models[node.id].rotation, models[node.id].rotation, -Math.PI/2);
       } else { //if there are no parts this is an armature
         var armature = createArmatureForNode(node);
         //dirty hack to put parent level armatures at the correct rotation
-        quat.rotateX(armature.rotation, armature.rotation, -Math.PI/2);
+        //TODO
+        //quat.rotateX(armature.rotation, armature.rotation, -Math.PI/2);
       
         //generate inverse bind poses for all child bones
         armature.generateInverseBindPoses();
@@ -150,6 +151,23 @@
         };
       }
 
+      //fix the normals and positions from blender coordinates
+      for (var i = 0; i < attribute_lists["POSITION"].length; i+=3) {
+        var x = attribute_lists["POSITION"][i];
+        var y = attribute_lists["POSITION"][i+2];
+        var z = -attribute_lists["POSITION"][i+1];
+        attribute_lists["POSITION"][i+1] = y;
+        attribute_lists["POSITION"][i+2] = z;
+      };
+      //fix the normals and positions from blender coordinates
+      for (var i = 0; i < attribute_lists["NORMAL"].length; i+=3) {
+        var x = attribute_lists["NORMAL"][i];
+        var y = attribute_lists["NORMAL"][i+2];
+        var z = -attribute_lists["NORMAL"][i+1];
+        attribute_lists["NORMAL"][i+1] = y;
+        attribute_lists["NORMAL"][i+2] = z;
+      };
+
       //create mesh parts that share the attribute_lists
       for(var p = 0; p < loaded_mesh.parts.length; p++) {
         var meshpart = new modelLib.meshpart(attribute_lists, loaded_mesh.parts[p].indices);
@@ -183,13 +201,13 @@
 
   function loadScaleTransRot(node, entity) {
     if("scale" in node) {
-      entity.scale = node.scale;
+      entity.scale = [node.scale[0], node.scale[2], node.scale[1]];
     }
     if("translation" in node) {
-      entity.translation = node.translation;
+      entity.translation = [node.translation[0], node.translation[2], node.translation[1]];
     }
     if("rotation" in node) {
-      entity.rotation = node.rotation;
+      entity.rotation = [node.rotation[0],node.rotation[2], node.rotation[1],-node.rotation[3]];
     }
   }
 }( window.g3djLib = window.g3djLib || {}, null ));

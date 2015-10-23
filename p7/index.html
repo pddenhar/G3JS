@@ -25,7 +25,7 @@
 Displaying scene.g3dj at <span id="fps"></span> fps<br>
 <canvas id="canvas" width="900" height="700"></canvas><br>
 Time of day: <input style="width:400px;" id="lightangle" type="range" min ="0.0" max="2.8" step =".05" value="0"/>
-<p>Use right click to rotate the viewer and W and S to zoom in and out.</p>
+<p>Use middle or right click to rotate the viewer and W and S to zoom in and out.</p>
 <script id="vs" type="notjs">
 precision mediump float;
 attribute vec4 POSITION;
@@ -124,6 +124,11 @@ function loop(timestamp) {
   renderer.renderFrame(viewProjection, world.cameraPosition, models, delta);
 
   world.handleInput(delta, inputManager);
+
+  //models.pig.translation[0] = 8 + 6*Math.sin(timestamp/1000);
+  //models.pig.translation[2] = 6 + 6*Math.cos(timestamp/1000);
+  //var nothing = quat.create();
+  //quat.rotateZ(models.pig.rotation, [-.707,0,0,.707], (timestamp/1000) + Math.PI/4);
 
   window.requestAnimationFrame(loop);
 }
