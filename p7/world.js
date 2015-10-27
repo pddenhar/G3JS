@@ -31,8 +31,10 @@
     }
 
     //reset deltas slowly
-    deltaVz -= deltaVz * .05;
-    deltaVy -= deltaVy * .05;
+    if(!inputManager.mouseState[2] && !inputManager.mouseState[1]) {
+      deltaVz -= deltaVz * .05;
+      deltaVy -= deltaVy * .05;
+    }
   }
   var lastX = null, lastY=null, lastWheelY=0;
   world.handleInput = function(delta, inputManager) {
@@ -70,7 +72,7 @@
       zoom(delta/16);
     }
 
-    if(inputManager.mouseState[2] || inputManager.mouseState[3]|| inputManager.mouseState[1]) {
+    if(inputManager.mouseState[2] || inputManager.mouseState[1]) {
       if(lastX == null || lastY == null) {
         lastX = inputManager.mouseState.x;
         lastY = inputManager.mouseState.y;
@@ -80,16 +82,16 @@
         lastX = inputManager.mouseState.x;
         lastY = inputManager.mouseState.y;
 
-        if(deltaVz > -cameraVz*20 && diffX > 0)
+        if(deltaVz > -cameraVz*10 && diffX > 0)
           deltaVz -= diffX/200;
 
-        if(deltaVz < cameraVz*20 && diffX < 0)
+        if(deltaVz < cameraVz*10 && diffX < 0)
           deltaVz -= diffX/200;
 
-        if(deltaVy > -cameraVz*20 && diffY < 0)
+        if(deltaVy > -cameraVz*10 && diffY < 0)
           deltaVy += diffY/200;
 
-        if(deltaVy < cameraVz*20 && diffY > 0)
+        if(deltaVy < cameraVz*10 && diffY > 0)
           deltaVy += diffY/200;
       }
     } else {

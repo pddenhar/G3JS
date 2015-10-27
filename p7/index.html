@@ -26,7 +26,8 @@ Displaying scene.g3dj at <span id="fps"></span> fps<br>
 <canvas id="canvas" width="1200" height="800"></canvas><br>
 Time of day: <input style="width:400px;" id="lightangle" type="range" min ="0.0" max="2.8" step =".05" value="0"/>
 <p>Use middle or right click to rotate the viewer and Scroll to zoom in and out.</p>
-<audio controls autoplay>
+<p>Scene music by Grey Hensley:</p>
+<audio controls>
   <source src="ambien.mp3" type="audio/mpeg">
 Your browser does not support the audio element.
 </audio>
@@ -65,7 +66,6 @@ void main() {
 <script id="fs" type="notjs">
 precision mediump float;
 uniform vec2 resolution;
-uniform float time;
 uniform vec3 lightVector;
 //actual position in world coordinates of the camera
 uniform vec3 cameraPosition;
@@ -96,6 +96,31 @@ void main() {
   gl_FragColor = vec4(diffColor + specColor, 1.0);
 }
 </script>
+  <script id="skyvs" type="notjs">
+attribute vec4 position;
+
+void main() {
+  gl_Position = vec4(position.xy, .999999, 1);
+}
+  </script>
+  <script id="skyfs" type="notjs">
+precision mediump float;
+
+uniform vec2 resolution;
+uniform vec3 cameraPosition;
+
+void main() {
+  vec3 normalCam = normalize(cameraPosition);
+  vec2 uv = gl_FragCoord.xy / resolution;
+  float color = 0.0;
+  // lifted from glslsandbox.com
+  vec3 sky = vec3(.5,.7,.9);
+  vec3 sunset = vec3(.95,.85,.5);
+  color += cos((uv.y-.5 - normalCam.y*.3)*5.3) * sin(uv.x*3.14);
+
+  gl_FragColor = vec4( mix(sky,sunset,color), 1.0 );
+}
+  </script>
 <script>
 var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 
