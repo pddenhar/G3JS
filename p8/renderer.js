@@ -3,7 +3,8 @@
   
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
-    this.programInfo = twgl.createProgramInfo(this.gl, ["vs", "fs"], ["POSITION", "NORMAL", "TEXCOORD0"]);
+    this.programInfo = twgl.createProgramInfo(this.gl, ["vs", "fs"]);
+    createAttribUnsetter(this.gl, this.programInfo);
     this.skyProgramInfo = twgl.createProgramInfo(this.gl, ["skyvs", "skyfs"]);
     this.gl.enable(this.gl.DEPTH_TEST);
 
@@ -45,6 +46,7 @@
       //just use the first texture as the diffuse texture
       this.uniforms.diffuse = meshpart.material.textures[0].glTexture;
     }
+    this.programInfo.unsetAttribs();
     twgl.setBuffersAndAttributes(this.gl, this.programInfo, meshpart.bufferInfo);
     twgl.setUniforms(this.programInfo, this.uniforms);
     twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
@@ -59,6 +61,26 @@
     twgl.setBuffersAndAttributes(gl, this.skyProgramInfo, this.skyBufferInfo);
     twgl.setUniforms(this.skyProgramInfo, skyuniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, this.skyBufferInfo);
+  }
+
+  function createAttribUnsetter(gl, programInfo) {
+    var program = programInfo.program;
+    var indexes = [];
+    var numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    for (var ii = 0; ii < numAttribs; ++ii) {
+      var attribInfo = gl.getActiveAttrib(program, ii);
+      if (!attribInfo) {
+        break;
+      }
+      var index = gl.getAttribLocation(program, attribInfo.name);
+      indexes.push(index);
+    }
+    programInfo.unsetAttribs = function() {
+      for (var i = indexes.length - 1; i >= 0; i--) {
+        index = indexes[i];
+        gl.disableVertexAttribArray(index);
+      };
+    }
   }
 
 }( window.renderLib = window.renderLib || {}, null ));
