@@ -45,6 +45,9 @@
     if("textures" in meshpart.material && meshpart.material.textures.length > 0) {
       //just use the first texture as the diffuse texture
       this.uniforms.diffuse = meshpart.material.textures[0].glTexture;
+      this.uniforms.useTexture = true;
+    } else {
+      this.uniforms.useTexture = false;
     }
     this.programInfo.unsetAttribs();
     twgl.setBuffersAndAttributes(this.gl, this.programInfo, meshpart.bufferInfo);

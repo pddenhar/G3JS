@@ -148,22 +148,21 @@
           i+=attr_size;
         };
       }
-
       //fix the normals and positions from blender coordinates
       //TODO this should be generalized
-      for (var i = 0; i < attribute_lists["POSITION"].length; i+=3) {
-        var x = attribute_lists["POSITION"][i];
-        var y = attribute_lists["POSITION"][i+2];
-        var z = -attribute_lists["POSITION"][i+1];
-        attribute_lists["POSITION"][i+1] = y;
-        attribute_lists["POSITION"][i+2] = z;
+      for (var i = 0; i < attribute_lists["POSITION"].data.length; i+=3) {
+        var x = attribute_lists["POSITION"].data[i];
+        var y = attribute_lists["POSITION"].data[i+2];
+        var z = -attribute_lists["POSITION"].data[i+1];
+        attribute_lists["POSITION"].data[i+1] = y;
+        attribute_lists["POSITION"].data[i+2] = z;
       }
-      for (var i = 0; i < attribute_lists["NORMAL"].length; i+=3) {
-        var x = attribute_lists["NORMAL"][i];
-        var y = attribute_lists["NORMAL"][i+2];
-        var z = -attribute_lists["NORMAL"][i+1];
-        attribute_lists["NORMAL"][i+1] = y;
-        attribute_lists["NORMAL"][i+2] = z;
+      for (var i = 0; i < attribute_lists["NORMAL"].data.length; i+=3) {
+        var x = attribute_lists["NORMAL"].data[i];
+        var y = attribute_lists["NORMAL"].data[i+2];
+        var z = -attribute_lists["NORMAL"].data[i+1];
+        attribute_lists["NORMAL"].data[i+1] = y;
+        attribute_lists["NORMAL"].data[i+2] = z;
       }
 
       //create mesh parts that share the attribute_lists

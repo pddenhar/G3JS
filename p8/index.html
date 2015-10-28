@@ -44,7 +44,6 @@ attribute vec2 BLENDWEIGHT4;
 attribute vec2 BLENDWEIGHT5;
 attribute vec2 BLENDWEIGHT6;
 
-
 uniform mat4 viewProjection;
 
 uniform mat4 worldTransform;
@@ -63,18 +62,13 @@ void main() {
   vec4 pos = viewProjection * worldPosition;
 
   worldNormal = normalTransform * NORMAL;
+  gl_Position = pos;
 
   texCoord=TEXCOORD0;
-
-  gl_Position = pos;
 }
 </script>
 <script id="fs" type="notjs">
 precision mediump float;
-
-varying vec2 texCoord;
-uniform sampler2D diffuse;
-
 uniform vec2 resolution;
 uniform vec3 lightVector;
 //actual position in world coordinates of the camera
@@ -85,6 +79,10 @@ uniform vec3 mat_specular;
 
 varying vec3 worldNormal;
 varying vec4 worldPosition;
+
+varying vec2 texCoord;
+uniform sampler2D diffuse;
+uniform bool useTexture;
 
 vec2 blinnPhongDir(vec3 lightDir, float Ka, float Kd, float Ks, float shininess)
 {
@@ -99,14 +97,18 @@ vec2 blinnPhongDir(vec3 lightDir, float Ka, float Kd, float Ks, float shininess)
 }
 
 void main() {
-  vec4 diffuseColor = texture2D(diffuse, texCoord);
+
+  vec4 diffuseColor = vec4(1.,1.,1.,1.);
+  if(useTexture == true)
+  {
+    diffuseColor = texture2D(diffuse, texCoord);
+  }
 
   vec2 phong = blinnPhongDir(lightVector, 1.0, 1.0, 0.5, 5.0)*.8;
   phong += blinnPhongDir(-lightVector, 1.0, 1.0, 0.0, 5.0)*.8;
-  vec3 diffColor = mat_diffuse + phong.x;
+  vec3 diffColor = diffuseColor.rgb * mat_diffuse * phong.x;
   vec3 specColor = mat_specular * phong.y;
-  //gl_FragColor = vec4(diffColor + specColor, 1.0);
-  gl_FragColor = diffuseColor;
+  gl_FragColor = vec4(diffColor + specColor, 1.0);
 }
 </script>
   <script id="skyvs" type="notjs">
