@@ -75,9 +75,9 @@
         if("textures" in meshpart.material) {
           for (var i = 0; i < meshpart.material.textures.length; i++) {
             var texture = meshpart.material.textures[i];
-            console.log(texture);
+            
             if (!("glTexture" in texture)) {
-              texture.glTexture = twgl.createTexture(gl, { src: texture.filename });
+              texture.glTexture = twgl.createTexture(gl, { src: texture.filename, target: gl.TEXTURE_2D, wrap: gl.REPEAT });
             }
           };
         }
