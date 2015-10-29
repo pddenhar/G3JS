@@ -75,13 +75,14 @@
         if("textures" in meshpart.material) {
           for (var i = 0; i < meshpart.material.textures.length; i++) {
             var texture = meshpart.material.textures[i];
+            console.log(texture);
             if (!("glTexture" in texture)) {
               texture.glTexture = twgl.createTexture(gl, { src: texture.filename });
             }
           };
         }
       }
-      modelLib.createGLBuffersForDict(gl, model.children);
+      modelLib.loadTexturesForDict(gl, model.children);
     };
   }
 
