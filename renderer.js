@@ -1,11 +1,18 @@
 (function( renderLib, $, undefined ) { 
   var light = [-5,1,1];
-  
+  var currentProgram = null;
+
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
     this.programInfo = twgl.createProgramInfo(this.gl, ["vs", "fs"]);
     createAttribUnsetter(this.gl, this.programInfo);
+
     this.skyProgramInfo = twgl.createProgramInfo(this.gl, ["skyvs", "skyfs"]);
+
+    this.shadowProgramInfo = twgl.createProgramInfo(this.gl, ["vs", "shadowfs"]);
+    createAttribUnsetter(this.gl, this.shadowProgramInfo);
+    this.shadowBuffer = twgl.createFramebufferInfo(gl, null, 256, 256);
+
     this.gl.enable(this.gl.DEPTH_TEST);
 
     var skyArray = {
@@ -16,8 +23,8 @@
 
   renderLib.renderer.prototype.renderFrame = function(viewProjection, cameraPosition, models, delta) {
     drawSky.call(this, cameraPosition);
+
     //draw the rest of scene
-    this.gl.useProgram(this.programInfo.program);
     var lightRotation = mat4.create();
     mat4.rotateZ(lightRotation, lightRotation, document.getElementById('lightangle').value * -1.0);
     var framelight = vec3.create();
@@ -29,10 +36,27 @@
     this.uniforms = {
       resolution: [this.gl.canvas.width, this.gl.canvas.height],
       viewProjection: viewProjection,
-      cameraPosition: cameraPosition,
       lightVector: framelight
     };
 
+    renderShadowMap.call(this, framelight);
+
+    //set the camera position to the real position (not the light)
+    this.uniforms.cameraPosition = cameraPosition;
+    //draw the real scene with the full shader
+    this.gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.gl.useProgram(this.programInfo.program);
+    currentProgram = this.programInfo;
+    for(key in models){
+      models[key].draw(this);
+    };
+  }
+  function renderShadowMap(frameLight) {
+    this.uniforms.cameraPosition = frameLight, //frameLight is the current position of the light and we're rendering a shadow map
+
+    this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowBuffer.framebuffer);
+    this.gl.useProgram(this.shadowProgramInfo.program);
+    currentProgram = this.shadowProgramInfo;
     for(key in models){
       models[key].draw(this);
     };
@@ -49,9 +73,9 @@
     } else {
       this.uniforms.useTexture = false;
     }
-    this.programInfo.unsetAttribs();
-    twgl.setBuffersAndAttributes(this.gl, this.programInfo, meshpart.bufferInfo);
-    twgl.setUniforms(this.programInfo, this.uniforms);
+    currentProgram.unsetAttribs();
+    twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
+    twgl.setUniforms(currentProgram, this.uniforms);
     twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
   }
   function drawSky(cameraPosition) {

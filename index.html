@@ -23,7 +23,7 @@
 </head>
 <body>
 Displaying scene.g3dj at <span id="fps"></span> fps<br>
-<canvas id="canvas" width="1200" height="800"></canvas><br>
+<canvas id="canvas" width="800" height="600"></canvas><br>
 Time of day: <input style="width:400px;" id="lightangle" type="range" min ="0.0" max="2.8" step =".05" value="0"/>
 <p>Use middle or left click to rotate the viewer and Scroll (or W amd S) to zoom in and out.</p>
 <p>Scene music by Grey Hensley:</p>
@@ -36,13 +36,6 @@ precision mediump float;
 attribute vec4 POSITION;
 attribute vec3 NORMAL;
 attribute vec2 TEXCOORD0;
-attribute vec2 BLENDWEIGHT0;
-attribute vec2 BLENDWEIGHT1;
-attribute vec2 BLENDWEIGHT2;
-attribute vec2 BLENDWEIGHT3;
-attribute vec2 BLENDWEIGHT4;
-attribute vec2 BLENDWEIGHT5;
-attribute vec2 BLENDWEIGHT6;
 
 uniform mat4 viewProjection;
 
@@ -111,14 +104,20 @@ void main() {
   gl_FragColor = vec4(diffColor + specColor, 1.0);
 }
 </script>
-  <script id="skyvs" type="notjs">
+<script type="notjs" id="shadowfs">
+void main(){
+  // Not really needed, OpenGL does it anyway
+  gl_FragColor = vec4(1.0,1.0,1.0,.5);
+}
+</script>
+<script id="skyvs" type="notjs">
 attribute vec4 position;
 
 void main() {
   gl_Position = vec4(position.xy, .999999, 1);
 }
-  </script>
-  <script id="skyfs" type="notjs">
+</script>
+<script id="skyfs" type="notjs">
 precision mediump float;
 
 uniform vec2 resolution;
@@ -135,8 +134,10 @@ void main() {
 
   gl_FragColor = vec4( mix(sky,sunset,color), 1.0 );
 }
-  </script>
+</script>
 <script>
+inputManager.initManager(document.getElementById("canvas"));
+
 var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 
 //load a g3dj file

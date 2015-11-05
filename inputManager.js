@@ -2,35 +2,34 @@
   inputManager.keyboardState = [];
   inputManager.mouseState = {};
 
-  function initManager() {
+  inputManager.initManager = function(element) {
     inputManager.mouseState.wheelY = 0;
     
-    window.onkeydown=function(event) {
+    element.onkeydown=function(event) {
       //console.log(event.which);
       inputManager.keyboardState[event.which] = true;
     };
-    window.onkeyup = function(event) {
+    element.onkeyup = function(event) {
       inputManager.keyboardState[event.which] = false;
     };
-    window.onmousedown = function(event) {
+    element.onmousedown = function(event) {
       if(event.which == 2)
         event.preventDefault();
       inputManager.mouseState[event.which] = true;
     };
-    window.onmouseup = function(event) {
+    element.onmouseup = function(event) {
       if(event.which == 2)
         event.preventDefault();
       inputManager.mouseState[event.which] = false;
     };
-    window.onmousemove = function(event) {
+    element.onmousemove = function(event) {
       inputManager.mouseState.x = event.pageX;
       inputManager.mouseState.y = event.pageY;
     };
-    window.onwheel = function(event) {
+    element.onwheel = function(event) {
       var deltaY = event.wheelDeltaY;
       inputManager.mouseState.wheelY += deltaY;
     };
   }
-  initManager();
 
 }( window.inputManager = window.inputManager || {}, null ));
