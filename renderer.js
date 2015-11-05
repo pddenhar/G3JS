@@ -1,17 +1,17 @@
 (function( renderLib, $, undefined ) { 
-  var light = [-5,1,1];
+  var light = [-40,30,-40];
   var currentProgram = null;
 
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
-    this.programInfo = twgl.createProgramInfo(this.gl, ["vs", "fs"]);
+    this.programInfo = twgl.createProgramInfo(this.gl, [vs, fs]);
     createAttribUnsetter(this.gl, this.programInfo);
 
-    this.skyProgramInfo = twgl.createProgramInfo(this.gl, ["skyvs", "skyfs"]);
+    this.skyProgramInfo = twgl.createProgramInfo(this.gl, [skyvs, skyfs]);
 
-    this.shadowProgramInfo = twgl.createProgramInfo(this.gl, ["vs", "shadowfs"]);
+    this.shadowProgramInfo = twgl.createProgramInfo(this.gl, [vs, fs]);
     createAttribUnsetter(this.gl, this.shadowProgramInfo);
-    this.shadowBuffer = twgl.createFramebufferInfo(gl, null, 256, 256);
+    this.shadowBuffer = twgl.createFramebufferInfo(gl, null, 1024, 1024);
 
     this.gl.enable(this.gl.DEPTH_TEST);
 
@@ -31,19 +31,19 @@
     vec3.transformMat4(framelight, light, lightRotation);
 
     twgl.resizeCanvasToDisplaySize(this.gl.canvas);
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
     this.uniforms = {
       resolution: [this.gl.canvas.width, this.gl.canvas.height],
-      viewProjection: viewProjection,
-      lightVector: framelight
+      lightVector: framelight,
+      cameraPosition: cameraPosition
     };
-
+    this.uniforms.viewProjection = viewProjection;
     renderShadowMap.call(this, framelight);
 
-    //set the camera position to the real position (not the light)
-    this.uniforms.cameraPosition = cameraPosition;
+    //set the view projection to the real thing (not a shadow projection)
+    this.uniforms.viewProjection = viewProjection;
     //draw the real scene with the full shader
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.gl.useProgram(this.programInfo.program);
     currentProgram = this.programInfo;
@@ -52,8 +52,19 @@
     };
   }
   function renderShadowMap(frameLight) {
-    this.uniforms.cameraPosition = frameLight, //frameLight is the current position of the light and we're rendering a shadow map
+    var cameraMatrix = mat4.create();
+    mat4.lookAt(cameraMatrix, frameLight, [0,0,0], [0,1,0]);
 
+    var projection = mat4.create();
+    mat4.ortho(projection, -100,100,-100,100,1,200);
+
+    var viewProjection = mat4.create();
+    mat4.multiply(viewProjection, cameraMatrix, viewProjection);
+    mat4.multiply(viewProjection, projection, viewProjection);
+    
+    this.uniforms.viewProjection = viewProjection;
+    
+    this.gl.viewport(0, 0, 1024, 1024);
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowBuffer.framebuffer);
     this.gl.useProgram(this.shadowProgramInfo.program);
     currentProgram = this.shadowProgramInfo;

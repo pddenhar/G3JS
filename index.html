@@ -6,6 +6,7 @@
 
   <script src="gl-matrix.js"></script>
   <script src="twgl.min.js"></script>
+  <script src="shaders.js"></script>
   <script src="entity.js"></script>
   <script src="bones.js"></script>
   <script src="animation.js"></script>
@@ -31,108 +32,10 @@ Time of day: <input style="width:400px;" id="lightangle" type="range" min ="0.0"
   <source src="ambien.mp3" type="audio/mpeg">
 Your browser does not support the audio element.
 </audio>
-<script id="vs" type="notjs">
-precision mediump float;
-attribute vec4 POSITION;
-attribute vec3 NORMAL;
-attribute vec2 TEXCOORD0;
-
-uniform mat4 viewProjection;
-
-uniform mat4 worldTransform;
-//model world normal transform
-uniform mat3 normalTransform;
-
-varying vec3 worldNormal;
-varying vec4 worldPosition;
-varying vec2 texCoord;
-
-void main() {
-  //vertex position in world coords
-  worldPosition = worldTransform * POSITION;
-
-  //in normalized device coords
-  vec4 pos = viewProjection * worldPosition;
-
-  worldNormal = normalTransform * NORMAL;
-  gl_Position = pos;
-
-  texCoord=TEXCOORD0;
-}
-</script>
-<script id="fs" type="notjs">
-precision mediump float;
-uniform vec2 resolution;
-uniform vec3 lightVector;
-//actual position in world coordinates of the camera
-uniform vec3 cameraPosition;
-
-uniform vec3 mat_diffuse;
-uniform vec3 mat_specular;
-
-varying vec3 worldNormal;
-varying vec4 worldPosition;
-
-varying vec2 texCoord;
-uniform sampler2D diffuse;
-uniform bool useTexture;
-
-vec2 blinnPhongDir(vec3 lightDir, float Ka, float Kd, float Ks, float shininess)
-{
-  vec3 s = normalize(lightDir);
-  //vector from the camera to the point in the world
-  vec3 v = normalize(cameraPosition-worldPosition.xyz);
-  vec3 n = normalize(worldNormal);
-  vec3 h = normalize(v+s);
-  float diffuse = Ka + Kd * max(0.0, dot(n, s));
-  float spec =  Ks * pow(max(0.0, dot(n,h)), shininess);
-  return vec2(diffuse, spec);
-}
-
-void main() {
-
-  vec4 diffuseColor = vec4(1.,1.,1.,1.);
-  if(useTexture == true)
-  {
-    diffuseColor = texture2D(diffuse, texCoord);
-  }
-
-  vec2 phong = blinnPhongDir(lightVector, 1.0, 1.0, 0.5, 5.0)*.8;
-  phong += blinnPhongDir(-lightVector, 1.0, 1.0, 0.0, 5.0)*.8;
-  vec3 diffColor = diffuseColor.rgb * mat_diffuse * phong.x;
-  vec3 specColor = mat_specular * phong.y;
-  gl_FragColor = vec4(diffColor + specColor, 1.0);
-}
-</script>
 <script type="notjs" id="shadowfs">
 void main(){
   // Not really needed, OpenGL does it anyway
   gl_FragColor = vec4(1.0,1.0,1.0,.5);
-}
-</script>
-<script id="skyvs" type="notjs">
-attribute vec4 position;
-
-void main() {
-  gl_Position = vec4(position.xy, .999999, 1);
-}
-</script>
-<script id="skyfs" type="notjs">
-precision mediump float;
-
-uniform vec2 resolution;
-uniform vec3 cameraPosition;
-
-void main() {
-  vec3 normalCam = normalize(cameraPosition);
-  vec2 uv = gl_FragCoord.xy / resolution;
-  float color = 0.0;
-  // lifted from glslsandbox.com
-  vec3 sky = vec3(.5,.7,.9);
-  vec3 sunset = vec3(.95,.85,.5);
-  color += cos((uv.y-.5 - normalCam.y*.3)*5.3) * sin(uv.x*3.14);
-
-  gl_FragColor = vec4( mix(sky,sunset,color), 1.0 );
 }
 </script>
 <script>
