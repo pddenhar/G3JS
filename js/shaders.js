@@ -128,7 +128,6 @@ var quadFS = [
 
     "uniform sampler2D dinky;",
 
-    
     "varying vec2 texCoord;",
     
     "void main(void) {",
