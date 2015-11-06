@@ -31,6 +31,7 @@
     };
     this.skyBufferInfo = twgl.createBufferInfoFromArrays(gl, skyArray);
   }
+  // Function adapted from code by Brandon Jones
   function drawTexturedQuad(gl, texture, x, y, width, height) {
     if(!quadShader) {
         // Set up the verticies and indices
