@@ -35,16 +35,17 @@ uniform mat3 normalTransform;\n\
 varying vec3 worldNormal;\n\
 varying vec4 worldPosition;\n\
 varying vec2 texCoord;\n\
+varying vec4 devicePos;\n\
 \n\
 void main() {\n\
   //vertex position in world coords\n\
   worldPosition = worldTransform * POSITION;\n\
 \n\
   //in normalized device coords\n\
-  vec4 pos = viewProjection * worldPosition;\n\
+  devicePos = viewProjection * worldPosition;\n\
 \n\
   worldNormal = normalTransform * NORMAL;\n\
-  gl_Position = pos;\n\
+  gl_Position = devicePos;\n\
 \n\
   texCoord=TEXCOORD0;\n\
 }";
@@ -62,7 +63,9 @@ varying vec3 worldNormal;\n\
 varying vec4 worldPosition;\n\
 \n\
 varying vec2 texCoord;\n\
+uniform mat4 lightViewProjection;\n\
 uniform sampler2D diffuse;\n\
+uniform sampler2D shadowMap;\n\
 uniform bool useTexture;\n\
 \n\
 vec2 blinnPhongDir(vec3 lightDir, float Ka, float Kd, float Ks, float shininess)\n\
@@ -89,5 +92,20 @@ void main() {\n\
   phong += blinnPhongDir(-lightVector, 1.0, 1.0, 0.0, 5.0)*.8;\n\
   vec3 diffColor = diffuseColor.rgb * mat_diffuse * phong.x;\n\
   vec3 specColor = mat_specular * phong.y;\n\
-  gl_FragColor = vec4(diffColor + specColor, 1.0);\n\
+\n\
+  mat4 biasMatrix = mat4(0.5, 0.0, 0.0, 0.0,0.0, 0.5, 0.0, 0.0,0.0, 0.0, 0.5, 0.0,0.5, 0.5, 0.5, 1.0);\n\
+  vec4 shadowCoord = biasMatrix * lightViewProjection * worldPosition;\n\
+  float shadow = 1.0;\n\
+  float margin = 0.005;\n\
+  if ( texture2D( shadowMap, shadowCoord.xy ).z  <  shadowCoord.z - margin){\n\
+    shadow = 0.5;\n\
+  }\n\
+\n\
+  gl_FragColor = vec4(shadow*(diffColor + specColor), 1.0);\n\
+}";
+
+var shadowfs = "precision mediump float;\n\
+varying vec4 devicePos;\n\
+void main() {\n\
+  gl_FragColor = vec4(0.0,0.0,devicePos.z, 1.0);\n\
 }";

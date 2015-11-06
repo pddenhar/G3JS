@@ -9,9 +9,19 @@
 
     this.skyProgramInfo = twgl.createProgramInfo(this.gl, [skyvs, skyfs]);
 
-    this.shadowProgramInfo = twgl.createProgramInfo(this.gl, [vs, fs]);
+    var depthTextureExt = gl.getExtension("WEBGL_depth_texture"); // Or browser-appropriate prefix
+    if(!depthTextureExt) { alert("Your browser does not support depth textures! Please use chrome."); return; }
+    var size = 1024;
+
+    var attachments = [
+      { format: gl.RGBA, type: gl.UNSIGNED_BYTE, min: gl.NEAREST, mag: gl.NEAREST, wrap: gl.CLAMP_TO_EDGE },
+      { format: gl.DEPTH_COMPONENT, type: gl.UNSIGNED_SHORT, min: gl.NEAREST, mag: gl.NEAREST, wrap: gl.CLAMP_TO_EDGE  },
+    ];
+    
+    this.shadowProgramInfo = twgl.createProgramInfo(this.gl, [vs, shadowfs]);
     createAttribUnsetter(this.gl, this.shadowProgramInfo);
-    this.shadowBuffer = twgl.createFramebufferInfo(gl, null, 1024, 1024);
+    this.shadowBuffer = twgl.createFramebufferInfo(gl, attachments, size, size);
+    this.shadowBuffer.size = size;
 
     this.gl.enable(this.gl.DEPTH_TEST);
 
@@ -35,9 +45,9 @@
     this.uniforms = {
       resolution: [this.gl.canvas.width, this.gl.canvas.height],
       lightVector: framelight,
-      cameraPosition: cameraPosition
+      cameraPosition: cameraPosition,
+      viewProjection: viewProjection
     };
-    this.uniforms.viewProjection = viewProjection;
     renderShadowMap.call(this, framelight);
 
     //set the view projection to the real thing (not a shadow projection)
@@ -56,16 +66,21 @@
     mat4.lookAt(cameraMatrix, frameLight, [0,0,0], [0,1,0]);
 
     var projection = mat4.create();
-    mat4.ortho(projection, -100,100,-100,100,1,200);
+    mat4.ortho(projection, -50,50,-50,50,1,200);
 
     var viewProjection = mat4.create();
     mat4.multiply(viewProjection, cameraMatrix, viewProjection);
     mat4.multiply(viewProjection, projection, viewProjection);
     
     this.uniforms.viewProjection = viewProjection;
+    //this uniform will get used later during actual drawing
+
+    this.uniforms.lightViewProjection = viewProjection;
     
-    this.gl.viewport(0, 0, 1024, 1024);
+    this.gl.viewport(0, 0, this.shadowBuffer.size, this.shadowBuffer.size);
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowBuffer.framebuffer);
+    //gl.colorMask(false, false, false, false); // Don't write to the color channels at all
+    gl.clear(gl.DEPTH_BUFFER_BIT); // Clear only the depth buffer
     this.gl.useProgram(this.shadowProgramInfo.program);
     currentProgram = this.shadowProgramInfo;
     for(key in models){
@@ -84,6 +99,9 @@
     } else {
       this.uniforms.useTexture = false;
     }
+
+    this.uniforms.shadowMap = this.shadowBuffer.attachments[1]
+
     currentProgram.unsetAttribs();
     twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
     twgl.setUniforms(currentProgram, this.uniforms);

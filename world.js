@@ -10,7 +10,7 @@
     world.handleInput(delta, inputManager);
     world.updateCamera(delta);
   }
-  var cameraVz = Math.PI/35; //rad/sec
+  var cameraVz = Math.PI/55; //rad/sec
   var deltaVz = 0;
   var deltaVy = 0;
   world.updateCamera = function(delta){

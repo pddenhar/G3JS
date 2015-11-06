@@ -5,11 +5,11 @@
   inputManager.initManager = function(element) {
     inputManager.mouseState.wheelY = 0;
     
-    element.onkeydown=function(event) {
+    window.onkeydown=function(event) {
       //console.log(event.which);
       inputManager.keyboardState[event.which] = true;
     };
-    element.onkeyup = function(event) {
+    window.onkeyup = function(event) {
       inputManager.keyboardState[event.which] = false;
     };
     element.onmousedown = function(event) {
