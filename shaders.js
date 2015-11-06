@@ -97,7 +97,7 @@ void main() {\n\
   vec4 shadowCoord = biasMatrix * lightViewProjection * worldPosition;\n\
   float shadow = 1.0;\n\
   float margin = 0.005;\n\
-  if ( texture2D( shadowMap, shadowCoord.xy ).z  <  shadowCoord.z - margin){\n\
+  if ( texture2D( shadowMap, shadowCoord.xy ).r  <  shadowCoord.z - margin){\n\
     shadow = 0.5;\n\
   }\n\
 \n\
@@ -109,3 +109,30 @@ varying vec4 devicePos;\n\
 void main() {\n\
   gl_FragColor = vec4(0.0,0.0,devicePos.z, 1.0);\n\
 }";
+
+// Shader
+var quadVS = [
+    "attribute vec3 position;",
+    "attribute vec2 texture;",
+
+    "varying vec2 texCoord;",
+
+    "void main(void) {",
+    "   texCoord = texture;",
+    "   gl_Position = vec4(position, 1.0);",
+    "}"
+].join("\n");
+
+var quadFS = [
+    "precision mediump float;",
+
+    "uniform sampler2D dinky;",
+
+    
+    "varying vec2 texCoord;",
+    
+    "void main(void) {",
+    "   vec4 color = texture2D(dinky, texCoord);",
+    "   gl_FragColor = vec4(color.rgb, 1.0);",
+    "}"
+].join("\n");

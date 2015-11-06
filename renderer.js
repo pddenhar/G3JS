@@ -1,7 +1,8 @@
 (function( renderLib, $, undefined ) { 
   var light = [-40,30,-40];
   var currentProgram = null;
-
+  var quadShader;
+  var depthTextureExt;
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
     this.programInfo = twgl.createProgramInfo(this.gl, [vs, fs]);
@@ -9,8 +10,8 @@
 
     this.skyProgramInfo = twgl.createProgramInfo(this.gl, [skyvs, skyfs]);
 
-    var depthTextureExt = gl.getExtension("WEBGL_depth_texture"); // Or browser-appropriate prefix
-    if(!depthTextureExt) { alert("Your browser does not support depth textures! Please use chrome."); return; }
+    depthTextureExt = gl.getExtension("WEBGL_depth_texture"); // Or browser-appropriate prefix
+    if(!depthTextureExt) { alert("Your browser does not support depth textures! Please use chrome."); }
     var size = 1024;
 
     var attachments = [
@@ -30,7 +31,35 @@
     };
     this.skyBufferInfo = twgl.createBufferInfoFromArrays(gl, skyArray);
   }
+  function drawTexturedQuad(gl, texture, x, y, width, height) {
+    if(!quadShader) {
+        // Set up the verticies and indices
+        var arrays = {
+          position: [-1, -1, 0, 1, -1, 0, -1, 1, 0, -1, 1, 0, 1, -1, 0, 1, 1, 0],
+          texture: {numComponents:2, data:[0,0,  1,0,  0,1,  0,1,  1,0,  1,1]},
+        };
 
+        quadShader = twgl.createProgramInfo(this.gl, [quadVS, quadFS]);
+        quadShader.buffers = twgl.createBufferInfoFromArrays(gl, arrays);
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    // This is a terrible way to do this, use a transform matrix instead
+    var viewport = gl.getParameter(gl.VIEWPORT);
+    gl.viewport(x, y, width, height);
+
+    gl.disable(gl.DEPTH_TEST);
+
+    gl.useProgram(quadShader.program);
+
+    twgl.setBuffersAndAttributes(gl, quadShader, quadShader.buffers);
+    
+    twgl.setUniforms(quadShader,{dinky:texture});
+
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, quadShader.buffers);
+
+    gl.enable(gl.DEPTH_TEST);
+    //gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+  }
   renderLib.renderer.prototype.renderFrame = function(viewProjection, cameraPosition, models, delta) {
     drawSky.call(this, cameraPosition);
 
@@ -49,12 +78,12 @@
       viewProjection: viewProjection
     };
     renderShadowMap.call(this, framelight);
-
     //set the view projection to the real thing (not a shadow projection)
     this.uniforms.viewProjection = viewProjection;
     //draw the real scene with the full shader
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    drawTexturedQuad.call(this, this.gl, this.shadowBuffer.attachments[1], 0, 0, 200,200);
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.useProgram(this.programInfo.program);
     currentProgram = this.programInfo;
     for(key in models){
