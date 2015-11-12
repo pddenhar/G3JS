@@ -124,10 +124,21 @@ varying vec4 devicePos;\n\
 void main() {\n\
   //vertex position in world coords\n\
   worldPosition = worldTransform * POSITION;\n\
-  worldPosition.y += sin(worldPosition.x + time);\n\
+  float L = 3.0; //wavelength\n\
+  float A = 1.0; //amplitude\n\
+  float phi = 1.0; //phase constant (speed * frequency)\n\
+  vec2 waveDir = vec2(1,0); //direction (x,z)\n\
+  float w = 1.0;\n\
+  float Q = 1.0/(w*A);\n\
+  \n\
+  \n\
+  worldPosition.x += Q*A*waveDir.x*cos(dot(w*waveDir, worldPosition.xz) + phi*time);\n\
+  worldPosition.z += Q*A*waveDir.y*cos(dot(w*waveDir, worldPosition.xz) + phi*time);\n\
+  worldPosition.y += A*sin(dot(w*waveDir, worldPosition.xz) + phi*time);\n\
 \n\
   //in normalized device coords\n\
   devicePos = viewProjection * worldPosition;\n\
+  texCoord=TEXCOORD0;\n\
 \n\
   worldNormal = normalTransform * NORMAL;\n\
   gl_Position = devicePos;\n\

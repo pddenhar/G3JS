@@ -16,7 +16,7 @@
   world.updateCamera = function(delta){
     //rotate side to side
     var rotationMatrix = mat4.create();
-    mat4.rotateY(rotationMatrix, rotationMatrix, delta/1000 * (cameraVz + deltaVz));
+    mat4.rotateY(rotationMatrix, rotationMatrix, delta/1000 * (cameraVz*0 + deltaVz));
     vec3.transformMat4(world.cameraPosition, world.cameraPosition, rotationMatrix);
     //rotate up/down
     var normalCamera = vec3.create();
