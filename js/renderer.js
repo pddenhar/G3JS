@@ -83,7 +83,7 @@
     this.uniforms.viewProjection = viewProjection;
     //draw the real scene with the full shader
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    drawTexturedQuad.call(this, this.gl, this.shadowBuffer.attachments[1], 0, 0, 200,200);
+    //drawTexturedQuad.call(this, this.gl, this.shadowBuffer.attachments[1], 0, 0, 200,200);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.useProgram(this.programInfo.program);
     currentProgram = this.programInfo;

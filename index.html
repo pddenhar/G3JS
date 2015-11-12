@@ -15,6 +15,7 @@
   <script src="js/model.js"></script>
   <script src="js/g3djLib.js"></script>
   <script src="js/world.js"></script>
+  <script src="js/water.js"></script>
   <script src="scene.g3dj"></script>
   <style type="text/css">
     canvas {
@@ -47,6 +48,8 @@ var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 var models = g3djLib.parseModel(loaded_obj);
 modelLib.createGLBuffersForDict(gl, models);
 modelLib.loadTexturesForDict(gl, models);
+
+var waterModel = new water.waterModel("water", null, 2,2);
 
 world.init(models, vec3.fromValues(45,35,40));
 
