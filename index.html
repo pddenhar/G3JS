@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <title>Den Hartog P9</title>
+  <title>Den Hartog P10</title>
 
   <script src="lib/gl-matrix.js"></script>
   <script src="lib/twgl.js"></script>
@@ -47,9 +47,10 @@ var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 //load a g3dj file
 var models = g3djLib.parseModel(loaded_obj);
 
-var waterModel = new water.waterModel("water", null, 150, 150, 200, 200);
+var waveSize = 250;
+var waterModel = new water.waterModel("water", null, 150, 150, waveSize, waveSize);
 waterModel.scale= [1,1,1];
-waterModel.translation = [-100, -4, -100];
+waterModel.translation = [-waveSize/2, -4, -waveSize/2];
 
 var q = 1.0;
 
@@ -61,7 +62,7 @@ modelLib.loadTexturesForDict(gl, models);
 world.init(models, vec3.fromValues(45,35,40));
 
 var projection = mat4.create();
-mat4.perspective(projection, Math.PI / 3, canvas.width / canvas.height, 1, 250);
+mat4.perspective(projection, Math.PI / 3, canvas.width / canvas.height, 1, 1000);
 
 var renderer = new renderLib.renderer(gl);
 
