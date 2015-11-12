@@ -124,18 +124,23 @@ varying vec4 devicePos;\n\
 void main() {\n\
   //vertex position in world coords\n\
   worldPosition = worldTransform * POSITION;\n\
-  float L[2];//wavelength\n\
+  const int waveCount = 3;\n\
+  float L[waveCount];//wavelength\n\
   L[0] = 1.5;\n\
   L[1] = 3.0; \n\
-  float A[2];//amplitude\n\
+  L[2] = 1.5; \n\
+  float A[waveCount];//amplitude\n\
   A[0] = .5;\n\
   A[1] = .4; \n\
-  float speed[2];\n\
+  A[2] = .3; \n\
+  float speed[waveCount];\n\
   speed[0] = 1.0;\n\
-  speed[1] = 2.0; \n\
-  vec2 waveDir[2];//direction (x,z)\n\
-  waveDir[0] = vec2(0,1);\n\
-  waveDir[1] = vec2(0,1); \n\
+  speed[1] = 1.0; \n\
+  speed[2] = 1.2; \n\
+  vec2 waveDir[waveCount];//direction (x,z)\n\
+  waveDir[0] = normalize(vec2(0,1));\n\
+  waveDir[1] = normalize(vec2(.1,1)); \n\
+  waveDir[2] = normalize(vec2(-.1,1)); \n\
   \n\
   float xdiff = 0.0;\n\
   float zdiff = 0.0;\n\
@@ -144,18 +149,18 @@ void main() {\n\
   float zn = 0.0;\n\
   float yn = 0.0;\n\
   \n\
-  for (int i=0; i<2; i++) {\n\
+  for (int i=0; i<waveCount; i++) {\n\
     float w = speed[i]/L[i]; //frequency\n\
     float phi = speed[i] * w; //phase constant (speed * frequency)\n\
-    float Q = .5/(w*A[i]);\n\
+    float Q = .6/(w*float(waveCount));\n\
     \n\
-    xdiff += Q*A[i]*waveDir[i].x*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
-    zdiff += Q*A[i]*waveDir[i].y*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    xdiff += Q*waveDir[i].x*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    zdiff += Q*waveDir[i].y*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
     ydiff += A[i]*sin(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
     \n\
     xn -= waveDir[i].x*w*A[i]*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
     zn -= waveDir[i].y*w*A[i]*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
-    yn += Q*w*A[i]*sin(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    yn += Q*w*sin(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
   }\n\
   worldPosition.x += xdiff;\n\
   worldPosition.z += zdiff;\n\

@@ -3,6 +3,7 @@
 water.waterModel = function(name, parent, xdivs, zdivs, xwidth, zwidth) {
   modelLib.model.call(this, name, parent);
   this.shader = "water";
+  this.occlude = false;
   var watermesh = new modelLib.meshpart();
   var POSITION = [];
   var NORMAL = [];

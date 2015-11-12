@@ -5,6 +5,7 @@
     entityLib.entity3d.call(this, name, parent);
     this.meshparts = meshparts || {};
     this.shader = null;
+    this.occlude = true;
   }
   modelLib.model.prototype = new entityLib.entity3d();
   modelLib.model.prototype.setUniformsAndDraw = function(renderer, parentTransform) {
@@ -27,7 +28,7 @@
 
     for (var key in this.meshparts) {
       var meshpart = this.meshparts[key];
-      meshpart.setUniformsAndDraw(renderer)
+      meshpart.setUniformsAndDraw(renderer, this.occlude)
     }
 
     for (var key in this.children) {
@@ -50,7 +51,7 @@
     this.material = {};
     this.bufferInfo = null;
   }
-  modelLib.meshpart.prototype.setUniformsAndDraw = function(renderer) {
+  modelLib.meshpart.prototype.setUniformsAndDraw = function(renderer, occlude) {
     //a meshpart doesn't set up it's own transform (world / normal) because the model object
     //already should have
     if("diffuse" in this.material)
@@ -65,7 +66,7 @@
       renderer.uniforms.useTexture = false;
     }
 
-    renderer.renderMeshpart(this);
+    renderer.renderMeshpart(this, occlude);
   }
   modelLib.meshpart.prototype.createGLBuffers = function(glWebContext) {
     if(this.bufferInfo == null)

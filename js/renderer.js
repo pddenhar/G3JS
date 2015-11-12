@@ -69,11 +69,13 @@
       models[key].setUniformsAndDraw(this);
     };
   }
-  renderLib.renderer.prototype.renderMeshpart = function(meshpart) { 
-    twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
-    twgl.setUniforms(currentProgram, this.uniforms);
-    twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
-    currentProgram.unsetAttribs();
+  renderLib.renderer.prototype.renderMeshpart = function(meshpart, occlude) { 
+    if(currentProgram !== this.programs["shadow"] || occlude == true) {
+      twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
+      twgl.setUniforms(currentProgram, this.uniforms);
+      twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
+      currentProgram.unsetAttribs();
+    }
   }
   renderLib.renderer.prototype.expectShader = function(programName) {
     var programName = programName || "skinned";

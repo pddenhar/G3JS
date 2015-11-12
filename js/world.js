@@ -22,7 +22,7 @@
     var normalCamera = vec3.create();
     vec3.normalize(normalCamera, world.cameraPosition);
     var dot = vec3.dot(normalCamera, [0,1,0]);
-    if((dot < .98 || deltaVy < 0) && (dot > -.98 || deltaVy > 0)) {
+    if((dot < .98 || deltaVy < 0) && (dot > -.0 || deltaVy > 0)) {
       var rotateAxis = vec3.create();
       vec3.cross(rotateAxis, world.cameraPosition, [0,1,0]);
       vec3.normalize(rotateAxis,rotateAxis);
