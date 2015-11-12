@@ -3,12 +3,17 @@
   var currentProgram = null;
   var quadShader;
   var depthTextureExt;
+  var programLocked = false;
   renderLib.renderer = function(glWebContext) {
     this.gl = glWebContext;
-    this.programInfo = twgl.createProgramInfo(this.gl, [vs, fs]);
-    createAttribUnsetter(this.gl, this.programInfo);
-
-    this.skyProgramInfo = twgl.createProgramInfo(this.gl, [skyvs, skyfs]);
+    this.programs = {
+      skinned: twgl.createProgramInfo(this.gl, [vs, fs]),
+      sky: twgl.createProgramInfo(this.gl, [skyvs, skyfs]),
+      shadow: twgl.createProgramInfo(this.gl, [vs, shadowfs]),
+      water: twgl.createProgramInfo(this.gl, [watervs, fs]),
+    };
+    createAttribUnsetter(this.gl, this.programs.skinned);
+    createAttribUnsetter(this.gl, this.programs.water);
 
     depthTextureExt = gl.getExtension("WEBGL_depth_texture"); // Or browser-appropriate prefix
     if(!depthTextureExt) { alert("Your browser does not support depth textures! Please use chrome."); }
@@ -19,8 +24,7 @@
       { format: gl.DEPTH_COMPONENT, type: gl.UNSIGNED_SHORT, min: gl.NEAREST, mag: gl.NEAREST, wrap: gl.CLAMP_TO_EDGE  },
     ];
     
-    this.shadowProgramInfo = twgl.createProgramInfo(this.gl, [vs, shadowfs]);
-    createAttribUnsetter(this.gl, this.shadowProgramInfo);
+    createAttribUnsetter(this.gl, this.programs.shadow);
     this.shadowBuffer = twgl.createFramebufferInfo(gl, attachments, size, size);
     this.shadowBuffer.size = size;
 
@@ -58,11 +62,28 @@
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     //drawTexturedQuad.call(this, this.gl, this.shadowBuffer.attachments[1], 0, 0, 200,200);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-    this.gl.useProgram(this.programInfo.program);
-    currentProgram = this.programInfo;
-    for(key in models){
+    this.gl.useProgram(this.programs.skinned.program);
+    currentProgram = this.programs.skinned;
+    programLocked = false;
+    for(var key in models){
       models[key].setUniformsAndDraw(this);
     };
+  }
+  renderLib.renderer.prototype.renderMeshpart = function(meshpart) { 
+    twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
+    twgl.setUniforms(currentProgram, this.uniforms);
+    twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
+    currentProgram.unsetAttribs();
+  }
+  renderLib.renderer.prototype.expectShader = function(programName) {
+    var programName = programName || "skinned";
+    if(!programLocked) {
+      if(programName in this.programs && currentProgram !== this.programs[programName])
+      {
+        this.gl.useProgram(this.programs[programName].program);
+        currentProgram = this.programs[programName];
+      }
+    }
   }
   function renderShadowMap(frameLight, models) {
     var cameraMatrix = mat4.create();
@@ -84,27 +105,22 @@
     this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowBuffer.framebuffer);
     //gl.colorMask(false, false, false, false); // Don't write to the color channels at all
     gl.clear(gl.DEPTH_BUFFER_BIT); // Clear only the depth buffer
-    this.gl.useProgram(this.shadowProgramInfo.program);
-    currentProgram = this.shadowProgramInfo;
-    for(key in models){
+    this.gl.useProgram(this.programs.shadow.program);
+    currentProgram = this.programs.shadow;
+    programLocked = true;
+    for(var key in models){
       models[key].setUniformsAndDraw(this);
     };
   }
-  renderLib.renderer.prototype.renderMeshpart = function(meshpart) { 
-    twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
-    twgl.setUniforms(currentProgram, this.uniforms);
-    twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
-    currentProgram.unsetAttribs();
-  }
   function drawSky(cameraPosition) {
     //draw sky
-    this.gl.useProgram(this.skyProgramInfo.program);
+    this.gl.useProgram(this.programs.sky.program);
     var skyuniforms = {
         resolution: [gl.canvas.width, gl.canvas.height],
         cameraPosition: cameraPosition,
     };
-    twgl.setBuffersAndAttributes(gl, this.skyProgramInfo, this.skyBufferInfo);
-    twgl.setUniforms(this.skyProgramInfo, skyuniforms);
+    twgl.setBuffersAndAttributes(gl, this.programs.sky, this.skyBufferInfo);
+    twgl.setUniforms(this.programs.sky, skyuniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, this.skyBufferInfo);
   }
 

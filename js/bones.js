@@ -9,7 +9,7 @@
   bones.bone3d.prototype.generateInverseBindPoseRecursive = function(parentTransform) {
     var transform = this.getTransformWithParentTransform(parentTransform);
     mat4.invert(this.inverseBindPose, transform);
-    for(key in this.children) {
+    for(var key in this.children) {
       this.children[key].generateInverseBindPoseRecursive(transform);
     };
   }
@@ -23,7 +23,7 @@
   bones.armature.prototype = new entityLib.entity3d();
   bones.armature.prototype.generateInverseBindPoses = function() {
     var transform = this.getTransformWithParent();
-    for(key in this.children) {
+    for(var key in this.children) {
       this.children[key].generateInverseBindPoseRecursive(transform);
     }
   }

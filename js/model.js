@@ -22,18 +22,21 @@
     renderer.uniforms.normalTransform = normalTransform;
     renderer.uniforms.worldTransform = worldTransform;
 
-    for (key in this.meshparts) {
+    //tell the renderer what shader this model expects. It may or may not get used
+    renderer.expectShader(this.shader);
+
+    for (var key in this.meshparts) {
       var meshpart = this.meshparts[key];
       meshpart.setUniformsAndDraw(renderer)
     }
 
-    for (key in this.children) {
+    for (var key in this.children) {
       this.children[key].setUniformsAndDraw(renderer, worldTransform);
     };
   }
 
   modelLib.model.prototype.createGLBuffers = function(glWebContext) {
-    for (key in this.meshparts) {
+    for (var key in this.meshparts) {
       var meshpart = this.meshparts[key];
       meshpart.createGLBuffers(glWebContext);
     }
@@ -71,7 +74,7 @@
         indices:  {numComponents:3, data:this.indices},
       };
 
-      for (key in this.attribute_lists) {
+      for (var key in this.attribute_lists) {
         var attribute = this.attribute_lists[key];
         arrays[key] = attribute;
       }
@@ -81,7 +84,7 @@
   }
 
   modelLib.createGLBuffersForDict = function(gl, models) {
-    for (key in models) {
+    for (var key in models) {
       var model = models[key];
       model.createGLBuffers(gl);
       modelLib.createGLBuffersForDict(gl, model.children);
@@ -89,9 +92,9 @@
   }
 
   modelLib.loadTexturesForDict = function(gl, models) {
-    for (modelid in models) {
+    for (var modelid in models) {
       var model = models[modelid];
-      for (meshpartid in model.meshparts) {
+      for (var meshpartid in model.meshparts) {
         var meshpart = model.meshparts[meshpartid];
         if("textures" in meshpart.material) {
           for (var i = 0; i < meshpart.material.textures.length; i++) {

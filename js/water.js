@@ -2,6 +2,7 @@
 
 water.waterModel = function(name, parent, xdivs, zdivs) {
   modelLib.model.call(this, name, parent);
+  this.shader = "water";
   var watermesh = new modelLib.meshpart();
   var POSITION = [];
   var indices = [];
@@ -43,5 +44,11 @@ water.waterModel = function(name, parent, xdivs, zdivs) {
 }
 
 water.waterModel.prototype = new modelLib.model();
+
+water.waterModel.prototype.setUniformsAndDraw = function(renderer, parentTransform) {
+  var time = new Date().getTime();
+  renderer.uniforms.time = time;
+  modelLib.model.prototype.setUniformsAndDraw.call(this, renderer, parentTransform);
+}
 
 }( window.water = window.water || {}, null ));

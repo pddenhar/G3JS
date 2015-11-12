@@ -56,12 +56,12 @@
     //now the models and armatures are loaded.
     //meshparts bones list only has the names of the bones right now
     //so we will replace those with references to the bone objects
-    for(key in meshparts) {
+    for(var key in meshparts) {
       var meshpart = meshparts[key];
       for (var i = 0; i < meshpart.bones.length; i++) {
         var bonename = meshpart.bones[i];
         var bone = null;
-        for(armatureName in armatures) {
+        for(var armatureName in armatures) {
           if(bonename in armatures[armatureName].bones) {
             bone = armatures[armatureName].bones[bonename];
             break;

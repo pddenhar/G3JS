@@ -104,6 +104,36 @@ void main() {\n\
   gl_FragColor = vec4(shadow*(diffColor + specColor), 1.0);\n\
 }";
 
+var watervs = "precision mediump float;\n\
+attribute vec4 POSITION;\n\
+attribute vec3 NORMAL;\n\
+attribute vec2 TEXCOORD0;\n\
+\n\
+uniform mat4 viewProjection;\n\
+\n\
+uniform mat4 worldTransform;\n\
+//model world normal transform\n\
+uniform mat3 normalTransform;\n\
+uniform float time;\n\
+\n\
+varying vec3 worldNormal;\n\
+varying vec4 worldPosition;\n\
+varying vec2 texCoord;\n\
+varying vec4 devicePos;\n\
+\n\
+void main() {\n\
+  //vertex position in world coords\n\
+  worldPosition = worldTransform * POSITION;\n\
+  worldPosition.y += sin(worldPosition.x + time/10000.0);\n\
+\n\
+  //in normalized device coords\n\
+  devicePos = viewProjection * worldPosition;\n\
+\n\
+  worldNormal = normalTransform * NORMAL;\n\
+  gl_Position = devicePos;\n\
+\n\
+}";
+
 var shadowfs = "precision mediump float;\n\
 varying vec4 devicePos;\n\
 void main() {\n\
