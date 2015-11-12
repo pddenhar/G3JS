@@ -16,9 +16,7 @@ water.waterModel = function(name, parent, xdivs, zdivs) {
       POSITION[(index) * 3 + 2] = z; 
     };
   };
-  console.log(POSITION);
   var tris = xdivs * zdivs * 2;
-  console.log(tris);
   for (var i = 0; i < xdivs; i++) {
     for (var j = 0; j < zdivs; j++) {
       var index = (i*zdivs+j) * 6;
@@ -30,8 +28,10 @@ water.waterModel = function(name, parent, xdivs, zdivs) {
       indices[index + 5] = (i+1)*(zdivs+1)+j + 1;
     }
   }
-  console.log(indices);
+  watermesh.indices = indices;
+  watermesh.attribute_lists.POSITION = POSITION;
 }
+
 water.waterModel.prototype = new modelLib.model();
 
 }( window.water = window.water || {}, null ));

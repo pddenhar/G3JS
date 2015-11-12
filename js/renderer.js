@@ -31,36 +31,6 @@
     };
     this.skyBufferInfo = twgl.createBufferInfoFromArrays(gl, skyArray);
   }
-  // Function adapted from code by Brandon Jones
-  function drawTexturedQuad(gl, texture, x, y, width, height) {
-    if(!quadShader) {
-        // Set up the verticies and indices
-        var arrays = {
-          position: [-1, -1, 0, 1, -1, 0, -1, 1, 0, -1, 1, 0, 1, -1, 0, 1, 1, 0],
-          texture: {numComponents:2, data:[0,0,  1,0,  0,1,  0,1,  1,0,  1,1]},
-        };
-
-        quadShader = twgl.createProgramInfo(this.gl, [quadVS, quadFS]);
-        quadShader.buffers = twgl.createBufferInfoFromArrays(gl, arrays);
-    }
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    // This is a terrible way to do this, use a transform matrix instead
-    var viewport = gl.getParameter(gl.VIEWPORT);
-    gl.viewport(x, y, width, height);
-
-    gl.disable(gl.DEPTH_TEST);
-
-    gl.useProgram(quadShader.program);
-
-    twgl.setBuffersAndAttributes(gl, quadShader, quadShader.buffers);
-    
-    twgl.setUniforms(quadShader,{dinky:texture});
-
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, quadShader.buffers);
-
-    gl.enable(gl.DEPTH_TEST);
-    //gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-  }
   renderLib.renderer.prototype.renderFrame = function(viewProjection, cameraPosition, models, delta) {
     drawSky.call(this, cameraPosition);
 
@@ -167,6 +137,36 @@
         gl.disableVertexAttribArray(index);
       };
     }
+  }
+  // Function adapted from code by Brandon Jones
+  function drawTexturedQuad(gl, texture, x, y, width, height) {
+    if(!quadShader) {
+        // Set up the verticies and indices
+        var arrays = {
+          position: [-1, -1, 0, 1, -1, 0, -1, 1, 0, -1, 1, 0, 1, -1, 0, 1, 1, 0],
+          texture: {numComponents:2, data:[0,0,  1,0,  0,1,  0,1,  1,0,  1,1]},
+        };
+
+        quadShader = twgl.createProgramInfo(this.gl, [quadVS, quadFS]);
+        quadShader.buffers = twgl.createBufferInfoFromArrays(gl, arrays);
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    // This is a terrible way to do this, use a transform matrix instead
+    var viewport = gl.getParameter(gl.VIEWPORT);
+    gl.viewport(x, y, width, height);
+
+    gl.disable(gl.DEPTH_TEST);
+
+    gl.useProgram(quadShader.program);
+
+    twgl.setBuffersAndAttributes(gl, quadShader, quadShader.buffers);
+    
+    twgl.setUniforms(quadShader,{dinky:texture});
+
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, quadShader.buffers);
+
+    gl.enable(gl.DEPTH_TEST);
+    //gl.viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
   }
 
 }( window.renderLib = window.renderLib || {}, null ));
