@@ -104,7 +104,7 @@ void main() {\n\
   gl_FragColor = vec4(shadow*(diffColor + specColor), 1.0);\n\
 }";
 
-var watervs = "precision mediump float;\n\
+var watervs = "precision highp float;\n\
 attribute vec4 POSITION;\n\
 attribute vec3 NORMAL;\n\
 attribute vec2 TEXCOORD0;\n\
@@ -124,7 +124,7 @@ varying vec4 devicePos;\n\
 void main() {\n\
   //vertex position in world coords\n\
   worldPosition = worldTransform * POSITION;\n\
-  worldPosition.y += sin(worldPosition.x + time/10000.0);\n\
+  worldPosition.y += sin(worldPosition.x + time);\n\
 \n\
   //in normalized device coords\n\
   devicePos = viewProjection * worldPosition;\n\
