@@ -48,7 +48,10 @@
       cameraPosition: cameraPosition,
       viewProjection: viewProjection
     };
-    renderShadowMap.call(this, framelight);
+    renderShadowMap.call(this, framelight, models);
+
+    //set the shadowMap uniform from the texture we rendered
+    this.uniforms.shadowMap = this.shadowBuffer.attachments[1]
     //set the view projection to the real thing (not a shadow projection)
     this.uniforms.viewProjection = viewProjection;
     //draw the real scene with the full shader
@@ -58,10 +61,10 @@
     this.gl.useProgram(this.programInfo.program);
     currentProgram = this.programInfo;
     for(key in models){
-      models[key].draw(this);
+      models[key].setUniformsAndDraw(this);
     };
   }
-  function renderShadowMap(frameLight) {
+  function renderShadowMap(frameLight, models) {
     var cameraMatrix = mat4.create();
     mat4.lookAt(cameraMatrix, frameLight, [0,0,0], [0,1,0]);
 
@@ -84,28 +87,14 @@
     this.gl.useProgram(this.shadowProgramInfo.program);
     currentProgram = this.shadowProgramInfo;
     for(key in models){
-      models[key].draw(this);
+      models[key].setUniformsAndDraw(this);
     };
   }
-  renderLib.renderer.prototype.renderMeshpart = function(meshpart, normalTransform, worldTransform) { 
-    this.uniforms.normalTransform = normalTransform;
-    this.uniforms.worldTransform = worldTransform;
-    this.uniforms.mat_diffuse = meshpart.material.diffuse;
-    this.uniforms.mat_specular = meshpart.material.specular;
-    if("textures" in meshpart.material && meshpart.material.textures.length > 0) {
-      //just use the first texture as the diffuse texture
-      this.uniforms.diffuse = meshpart.material.textures[0].glTexture;
-      this.uniforms.useTexture = true;
-    } else {
-      this.uniforms.useTexture = false;
-    }
-
-    this.uniforms.shadowMap = this.shadowBuffer.attachments[1]
-
-    currentProgram.unsetAttribs();
+  renderLib.renderer.prototype.renderMeshpart = function(meshpart) { 
     twgl.setBuffersAndAttributes(this.gl, currentProgram, meshpart.bufferInfo);
     twgl.setUniforms(currentProgram, this.uniforms);
     twgl.drawBufferInfo(this.gl, this.gl.TRIANGLES, meshpart.bufferInfo);
+    currentProgram.unsetAttribs();
   }
   function drawSky(cameraPosition) {
     //draw sky

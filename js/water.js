@@ -30,6 +30,16 @@ water.waterModel = function(name, parent, xdivs, zdivs) {
   }
   watermesh.indices = indices;
   watermesh.attribute_lists.POSITION = POSITION;
+  watermesh.material = {
+    "diffuse": [
+       0.000000, 0.154463, 0.800000
+    ],
+    "id": "Material__Water",
+    "specular": [
+       0.088986, 0.861024, 1.000000
+    ],
+  }
+  this.meshparts.watermesh = watermesh;
 }
 
 water.waterModel.prototype = new modelLib.model();

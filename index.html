@@ -46,12 +46,16 @@ var gl = twgl.getWebGLContext(document.getElementById("canvas"));
 
 //load a g3dj file
 var models = g3djLib.parseModel(loaded_obj);
+
+var waterModel = new water.waterModel("water", null, 50,50);
+waterModel.scale= [200,0,200];
+waterModel.translation = [-100, -5, -100];
+
+models.water = waterModel;
+console.log(models);
+
 modelLib.createGLBuffersForDict(gl, models);
 modelLib.loadTexturesForDict(gl, models);
-
-var waterModel = new water.waterModel("water", null, 2,2);
-waterModel.scale= [100,0,100];
-waterModel.createGLBuffers(gl);
 
 world.init(models, vec3.fromValues(45,35,40));
 

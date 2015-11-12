@@ -4,9 +4,10 @@
   modelLib.model = function(name, parent, meshparts) {
     entityLib.entity3d.call(this, name, parent);
     this.meshparts = meshparts || {};
+    this.shader = null;
   }
   modelLib.model.prototype = new entityLib.entity3d();
-  modelLib.model.prototype.draw = function(renderer, parentTransform) {
+  modelLib.model.prototype.setUniformsAndDraw = function(renderer, parentTransform) {
     parentTransform = parentTransform || null;
     var worldTransform = this.getTransformWithParentTransform(parentTransform);
 
@@ -17,13 +18,17 @@
     mat3.invert(normalTransform, normalTransform);
     mat3.transpose(normalTransform, normalTransform);
 
+    //each object sets up the uniforms it needs to be rendered
+    renderer.uniforms.normalTransform = normalTransform;
+    renderer.uniforms.worldTransform = worldTransform;
+
     for (key in this.meshparts) {
       var meshpart = this.meshparts[key];
-      renderer.renderMeshpart(meshpart, normalTransform, worldTransform);
+      meshpart.setUniformsAndDraw(renderer)
     }
 
     for (key in this.children) {
-      this.children[key].draw(renderer, worldTransform);
+      this.children[key].setUniformsAndDraw(renderer, worldTransform);
     };
   }
 
@@ -42,7 +47,23 @@
     this.material = {};
     this.bufferInfo = null;
   }
+  modelLib.meshpart.prototype.setUniformsAndDraw = function(renderer) {
+    //a meshpart doesn't set up it's own transform (world / normal) because the model object
+    //already should have
+    if("diffuse" in this.material)
+      renderer.uniforms.mat_diffuse = this.material.diffuse;
+    if("specular" in this.material)
+      renderer.uniforms.mat_specular = this.material.specular;
+    if("textures" in this.material && this.material.textures.length > 0) {
+      //just use the first texture as the diffuse texture
+      renderer.uniforms.diffuse = this.material.textures[0].glTexture;
+      renderer.uniforms.useTexture = true;
+    } else {
+      renderer.uniforms.useTexture = false;
+    }
 
+    renderer.renderMeshpart(this);
+  }
   modelLib.meshpart.prototype.createGLBuffers = function(glWebContext) {
     if(this.bufferInfo == null)
     {
