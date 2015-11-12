@@ -104,7 +104,7 @@ void main() {\n\
   gl_FragColor = vec4(shadow*(diffColor + specColor), 1.0);\n\
 }";
 
-var watervs = "precision highp float;\n\
+var watervs = "precision mediump float;\n\
 attribute vec4 POSITION;\n\
 attribute vec3 NORMAL;\n\
 attribute vec2 TEXCOORD0;\n\
@@ -124,23 +124,52 @@ varying vec4 devicePos;\n\
 void main() {\n\
   //vertex position in world coords\n\
   worldPosition = worldTransform * POSITION;\n\
-  float L = 3.0; //wavelength\n\
-  float A = 1.0; //amplitude\n\
-  float phi = 1.0; //phase constant (speed * frequency)\n\
-  vec2 waveDir = vec2(1,0); //direction (x,z)\n\
-  float w = 1.0;\n\
-  float Q = 1.0/(w*A);\n\
+  float L[2];//wavelength\n\
+  L[0] = 1.5;\n\
+  L[1] = 3.0; \n\
+  float A[2];//amplitude\n\
+  A[0] = .5;\n\
+  A[1] = .4; \n\
+  float speed[2];\n\
+  speed[0] = 1.0;\n\
+  speed[1] = 2.0; \n\
+  vec2 waveDir[2];//direction (x,z)\n\
+  waveDir[0] = vec2(0,1);\n\
+  waveDir[1] = vec2(0,1); \n\
   \n\
+  float xdiff = 0.0;\n\
+  float zdiff = 0.0;\n\
+  float ydiff = 0.0;\n\
+  float xn = 0.0; //normal values\n\
+  float zn = 0.0;\n\
+  float yn = 0.0;\n\
   \n\
-  worldPosition.x += Q*A*waveDir.x*cos(dot(w*waveDir, worldPosition.xz) + phi*time);\n\
-  worldPosition.z += Q*A*waveDir.y*cos(dot(w*waveDir, worldPosition.xz) + phi*time);\n\
-  worldPosition.y += A*sin(dot(w*waveDir, worldPosition.xz) + phi*time);\n\
+  for (int i=0; i<2; i++) {\n\
+    float w = speed[i]/L[i]; //frequency\n\
+    float phi = speed[i] * w; //phase constant (speed * frequency)\n\
+    float Q = .5/(w*A[i]);\n\
+    \n\
+    xdiff += Q*A[i]*waveDir[i].x*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    zdiff += Q*A[i]*waveDir[i].y*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    ydiff += A[i]*sin(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    \n\
+    xn -= waveDir[i].x*w*A[i]*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    zn -= waveDir[i].y*w*A[i]*cos(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+    yn += Q*w*A[i]*sin(w*dot(waveDir[i], worldPosition.xz) + phi*time);\n\
+  }\n\
+  worldPosition.x += xdiff;\n\
+  worldPosition.z += zdiff;\n\
+  worldPosition.y += ydiff;\n\
 \n\
   //in normalized device coords\n\
   devicePos = viewProjection * worldPosition;\n\
   texCoord=TEXCOORD0;\n\
 \n\
   worldNormal = normalTransform * NORMAL;\n\
+  worldNormal.x = xn;\n\
+  worldNormal.z = zn;\n\
+  worldNormal.y = 1.0 - yn;\n\
+  \n\
   gl_Position = devicePos;\n\
 \n\
 }";

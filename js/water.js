@@ -52,7 +52,7 @@ water.waterModel = function(name, parent, xdivs, zdivs, xwidth, zwidth) {
 water.waterModel.prototype = new modelLib.model();
 
 water.waterModel.prototype.setUniformsAndDraw = function(renderer, parentTransform) {
-  var time = (new Date().getTime() / 1000) % (Math.PI*2);
+  var time = (new Date().getTime() / 1000)-1447356481.175;
   renderer.uniforms.time = time;
   modelLib.model.prototype.setUniformsAndDraw.call(this, renderer, parentTransform);
 }
